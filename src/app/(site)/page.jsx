@@ -1,21 +1,30 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import Intro from "../components/IntroVideo/page"
+import Home from "./Home/page"
+import Navbar from "../components/Navbar/page"
+import Footer from "../components/Footer/page"
+import Work from "./Works/page"
+import Works from "./Works/page"
+
+export default function Page() {
+  const [showIntro, setShowIntro] = useState(true)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-white">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-white sm:items-start">
-        <Image
-          // className="dark:invert"
-          src="/image/logo.png"
-          alt="Scout Studios logo"
-          width={1000}
-          height={1000}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-
-        </div>
-      </main>
-    </div>
-  );
+    <>
+      {showIntro ? (
+        <Intro onFinish={() => setShowIntro(false)} />
+      ) : (
+        <>
+          <Navbar />
+          <main className="min-h-screen pt-20.5 pb-16">
+            <Home />
+            <Works />
+          </main>
+          <Footer />
+        </>
+      )}
+    </>
+  )
 }
