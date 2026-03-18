@@ -16,14 +16,16 @@ export default function Home() {
   // if (isLoading) return <p>Loading...</p>
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white text-black">
+    <section id="home" className="min-h-screen flex items-center justify-center bg-white text-black">
       {/* <h1 className="text-5xl font-bold">{data?.title}</h1> */}
-      <Image 
+      <Image
         src="/image/logo.png"
         alt="Scout Studios logo"
-        width={1500}
-        height={1500}
+        width={500}
+        height={500}
+        style={{ objectFit: "contain" }}
+
       />
-    </div>
+    </section>
   )
 }
