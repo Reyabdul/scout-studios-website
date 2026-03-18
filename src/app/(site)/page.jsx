@@ -13,9 +13,9 @@ export default function Page() {
 
   return (
     <>
-      {showIntro ? (
+      {/* {showIntro ? (
         <Intro onFinish={() => setShowIntro(false)} />
-      ) : (
+      ) : ( */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -28,7 +28,7 @@ export default function Page() {
           </main>
           <Footer />
         </motion.div>
-      )}
+      {/* )} */}
     </>
   )
 }
