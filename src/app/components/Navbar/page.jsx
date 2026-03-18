@@ -17,17 +17,20 @@ export default function Navbar() {
         {/* Center navigation */}
         <div className="flex items-center gap-8 text-sm font-medium">
           <span className="font-bold text-lg">SS</span>
-          <a href="#work">Works</a>
-          <a href="#">Mission</a>
-          <a href="#">Contact</a>
+          <a href="#works">Works</a>
+          <a href="#mission">Mission</a>
+          <a href="#contact">Contact</a>
         </div>
 
         {/* Right button */}
         <button
           onClick={() => setOpen(true)}
-          className="text-sm font-medium"
+          className="text-xs font-medium p-0 m-0"
         >
-          More Info ○ ○ ○
+          <p className="text-sm p-0 m-0">About Us</p>
+          <br/>
+          <p          className="text-xs font-medium p-0 m-0"
+          >○ ○ ○</p>
         </button>
       </nav>
 
