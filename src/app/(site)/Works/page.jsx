@@ -1,24 +1,25 @@
-"use client"
-
-// import { useQuery } from "@tanstack/react-query"
-// import { sanity } from "@/sanity/lib/client"
-import Image from "next/image"
-
+import ScrollVideoFrame from '@/app/features/ScrollVideoFrame';
+ 
+// export const metadata = {
+//   title: 'Works',
+// };
+//  
 export default function Works() {
-  // const { data, isLoading } = useQuery({
-  //   queryKey: ["homepage"],
-  //   queryFn: () =>
-  //     sanity.fetch(`*[_type == "homepage"][0]{
-  //       title
-  //     }`)
-  // })
-
-  // if (isLoading) return <p>Loading...</p>
-
   return (
-    <div id="works" className="min-h-screen flex items-center justify-center bg-orange text-black">
-      {/* <h1 className="text-5xl font-bold">{data?.title}</h1> */}
-      Works
-    </div>
-  )
+    <main>
+      {/* ─── Scroll-jacked video showcase ─────────────────────────────────── */}
+      <ScrollVideoFrame />
+ 
+      {/* ─── Rest of your Works content below ──────────────────────────────
+          The scroll lock auto-releases once the user passes the last video,
+          so everything below scrolls normally.
+      ──────────────────────────────────────────────────────────────────── */}
+      <section style={{ padding: '6rem 2rem', background: '#fff', color: '#fff' }}>
+        <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>
+          {/* Your project grid, case studies, etc. go here */}
+          More works content…
+        </p>
+      </section>
+    </main>
+  );
 }

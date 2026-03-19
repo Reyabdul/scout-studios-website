@@ -38,9 +38,9 @@ Site Stylesheet
 
 @font-face {
   font-family: 'Chillax-Bold';
-  src: url('../../public/font/Chillax/Fonts/OTF/Chillax-Semibold.otf') format('woff2'),
-       url('../../public/font/Chillax/Fonts/OTF/Chillax-Semibold.otf') format('woff'),
-       url('../../public/font/Chillax/Fonts/TTF/Chillax-Variable.ttf') format('truetype');
+  src: url('../../public/fonts/Chillax/Fonts/OTF/Chillax-Semibold.otf') format('woff2'),
+       url('../../public/fonts/Chillax/Fonts/OTF/Chillax-Semibold.otf') format('woff'),
+       url('../../public/fonts/Chillax/Fonts/TTF/Chillax-Variable.ttf') format('truetype');
 
   font-weight: 700;
   font-display: swap;
