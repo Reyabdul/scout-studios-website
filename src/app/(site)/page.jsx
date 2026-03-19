@@ -8,7 +8,7 @@ import Mission from "./Mission/page";
 import Navbar from "../components/Navbar/page";
 import Footer from "../components/Footer/page";
 import Works from "./Works/page";
-import ScrollVideoFrame from "../features/ScrollVideoFrame";
+
 export default function Page() {
   const [showIntro, setShowIntro] = useState(true);
 
@@ -28,14 +28,12 @@ export default function Page() {
             <Home />
           </section>
           <section id="works">
-        <ScrollVideoFrame />
-      </section>
+            <Works />
+          </section>
 
-          
-
-      <section id="mission" className="snap-start h-screen">
-        <Mission />
-      </section>
+          <section id="mission" className="snap-start h-screen">
+            <Mission />
+          </section>
           {/* 
       <section id="contact" className="snap-start h-screen">
         <ContactSection />
