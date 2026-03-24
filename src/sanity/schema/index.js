@@ -1,11 +1,11 @@
 import { intro } from "./intro"
 import { navbar } from "./navbar"
-import { aboutUs } from "./aboutUs"
+import { moreInfo } from "./moreInfo"
 
 export const schema = {
   types: [
     intro,
     navbar,
-    aboutUs,
+    moreInfo,
   ],
 }

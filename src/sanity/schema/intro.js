@@ -8,12 +8,17 @@ export const intro = defineType({
     defineField({
       name:'title1',
       type:'string',
-      title:'Title 1 (top)'
+      title:'Title 1 (top)',
+      description: 'Text used for the top title.',
+      placeholder: 'e.g. Scout',
+
     }),
     defineField({
       name:'title2',
       type:'string',
-      title:'Title 2 (bottom)'
+      title:'Title 2 (bottom)',
+      description: 'Text used for the bottom title.',
+      placeholder: 'e.g. Studios',
     }),
   ]
 })

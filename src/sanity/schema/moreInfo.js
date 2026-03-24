@@ -1,14 +1,14 @@
 import { defineType, defineField, defineArrayMember } from 'sanity'
 
-export const aboutUs = defineType({
-  name: 'aboutUs',
+export const moreInfo = defineType({
+  name: 'moreInfo',
   type: 'document',
-  title: "About Us Section",
+  title: "More Info Section",
   fields: [
     defineField({
-      name: 'title',
+      name: 'heading',
       type: 'string',
-      title: 'Title',
+      title: 'Heading',
       placeholder: 'e.g. Scout Studio'
     }),
     defineField({

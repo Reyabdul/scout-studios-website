@@ -71,11 +71,11 @@ export default function Intro({ onFinish }) {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="absolute bottom-10 left-10 leading-none"
           >
-            <h2 className="font-chillax font-bold text-[14rem] text-[#FFC800] mb-8">
+            <h2 className="font-chillax font-bold text-[10rem] text-[#FFC800] mb-8">
               {data.title1}
             </h2>
 
-            <h1 className="font-chillax font-bold text-[14rem] text-[#FFC800] -mt-20 ml-[20%]">
+            <h1 className="font-chillax font-bold text-[10rem] text-[#FFC800] -mt-20 ml-[20%]">
               {data.title2}
             </h1>
           </motion.div>
