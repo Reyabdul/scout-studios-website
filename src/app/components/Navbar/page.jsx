@@ -91,9 +91,10 @@ export default function Navbar() {
 
   // Fallbacks if fields are missing
   const siteName = data?.siteName;
+  // Correct links extraction based on Sanity schema: links is array of { label } objects.
   const links =
     Array.isArray(data?.links) && data.links.length > 0
-      ? data.links
+      ? data.links.map(link => link?.label || "") // extract label, default to empty string
       : ["Works", "Mission", "Contact"];
   const sideBarTitle = data?.sideBarTitle ?? "More Info";
 
@@ -120,6 +121,8 @@ export default function Navbar() {
           </span>
           <div className="flex gap-8 text-sm font-medium">
             {links.map((link, idx) => {
+              // Skip if link label is empty string
+              if (!link) return null;
               // All links have '#' plus lowercased link, no exceptions
               // e.g. 'Works' -> '#works', 'Contact' -> '#contact'
               const href = `#${link.toLowerCase()}`;

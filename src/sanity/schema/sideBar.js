@@ -1,98 +1,3 @@
-// import { defineType, defineField, defineArrayMember } from 'sanity'
-
-// export const moreInfo = defineType({
-//   name: 'moreInfo',
-//   type: 'document',
-//   title: "More Info Section",
-//   fields: [
-//     defineField({
-//       name: 'heading',
-//       type: 'string',
-//       title: 'Heading',
-//       placeholder: 'e.g. Scout Studio'
-//     }),
-//     defineField({
-//       name: 'body',
-//       type: 'array',
-//       title: 'Body',
-//       of: [
-//         defineArrayMember({
-//           type: 'block',
-//         }),
-//       ],
-//     }),
-//     defineField({
-//       name: 'subheading1',
-//       type: 'string',
-//       title: 'Subheading 1',
-//       placeholder: 'e.g. Services'
-//     }),
-//     defineField({
-//       name: 'services',
-//       title: 'Services',
-//       type: 'array',
-//       of: [{ type: 'string'}],
-//     }),
-//     defineField({
-//       name: 'subheading2',
-//       type: 'string',
-//       title: 'Subheading 2',
-//       placeholder: 'e.g. Contact'
-//     }),
-//     defineField({
-//       name: 'email',
-//       type: 'string',
-//       title: 'Email',
-//       placeholder: 'e.g. example@gmail.com'
-//     }),
-//     defineField({
-//       name: 'subheading3',
-//       type: 'string',
-//       title: 'Subheading 3',
-//       placeholder: 'e.g. Social Media'
-//     }),
-//     defineField({
-//       name: 'socialmedia',
-//       type: 'object',
-//       fieldsets: [
-//         { name: 'social', title: 'Social media' }
-//       ],
-//       fields: [
-//         {
-//           title: 'Twitter',
-//           name: 'twitter',
-//           type: 'url',
-//           fieldset: 'social'
-//         },
-//         {
-//           title: 'Instagram',
-//           name: 'instagram',
-//           type: 'url',
-//           fieldset: 'social'
-//         },
-//         {
-//           title: 'Facebook',
-//           name: 'facebook',
-//           type: 'url',
-//           fieldset: 'social'
-//         },
-//         {
-//           title: 'YouTube',
-//           name: 'youtube',
-//           type: 'url',
-//           fieldset: 'social'
-//         },
-//         {
-//           title: 'LinkedIn',
-//           name: 'linkedin',
-//           type: 'url',
-//           fieldset: 'social'
-//         },
-//       ]
-//     }),
-//   ],
-// })
-
 import { defineType, defineField, defineArrayMember } from 'sanity'
 
 export const moreInfo = defineType({
@@ -108,33 +13,41 @@ export const moreInfo = defineType({
   ],
 
   fields: [
-    // Heading
+    // ======================
+    // MAIN CONTENT
+    // ======================
     defineField({
       name: 'heading',
       type: 'string',
       title: 'Heading',
       group: 'main',
-      description: 'Main title shown at the top of the sidebar',
+      description:
+        'Main title at the top of the section. Keep it short (recommended: under 60 characters).',
       placeholder: 'e.g. Scout Studio',
+      validation: (Rule) =>
+        Rule.max(60).warning('Keep heading under 60 characters'),
     }),
 
-    // Body
     defineField({
       name: 'body',
       type: 'array',
-      title: 'Body Content',
+      title: 'Description',
       group: 'main',
-      description: 'Main descriptive text',
+      description:
+        'Main description about your studio or business. Keep paragraphs short for better readability.',
       of: [defineArrayMember({ type: 'block' })],
     }),
 
-    // Services
+    // ======================
+    // SERVICES
+    // ======================
     defineField({
       name: 'services',
       title: 'Services',
       type: 'array',
       group: 'services',
-      description: 'List of services offered',
+      description:
+        'Add the services you offer. Keep it concise (recommended: 3–8 items). You can drag to reorder.',
       of: [
         defineArrayMember({
           type: 'string',
@@ -143,71 +56,90 @@ export const moreInfo = defineType({
       options: {
         sortable: true,
       },
+      validation: (Rule) =>
+        Rule.max(12).warning(
+          'Too many services may make the layout look crowded'
+        ),
     }),
 
-    // Contact
+    // ======================
+    // CONTACT
+    // ======================
     defineField({
       name: 'email',
       type: 'string',
       title: 'Email Address',
       group: 'contact',
-      description: 'Contact email displayed to users',
+      description:
+        'Public contact email shown on the website (e.g. hello@studio.com).',
       placeholder: 'e.g. hello@studio.com',
       validation: (Rule) =>
-        Rule.email().warning('Enter a valid email address'),
+        Rule.email().warning('Please enter a valid email address'),
     }),
 
-    // Social Media (improved)
+    // ======================
+    // SOCIAL MEDIA
+    // ======================
     defineField({
       name: 'socialmedia',
       title: 'Social Media Links',
       type: 'array',
       group: 'social',
-      description: 'Add links to social platforms (optional)',
+      description:
+        `Optional: Add your social media profile links.\n
+• Paste full URLs (must include https://)\n
+• Example: https://instagram.com/yourname\n
+• The correct icon will appear automatically on the website\n
+• Avoid adding duplicate links\n
+• Recommended: 1–5 links`,
       of: [
         defineArrayMember({
           type: 'object',
-          fields: [
-            defineField({
-              name: 'platform',
-              title: 'Platform',
-              type: 'string',
-              options: {
-                list: [
-                  { title: 'Instagram', value: 'instagram' },
-                  { title: 'Facebook', value: 'facebook' },
-                  { title: 'YouTube', value: 'youtube' },
-                  { title: 'Twitter / X', value: 'twitter' },
-                  { title: 'LinkedIn', value: 'linkedin' },
-                ],
-                layout: 'dropdown',
-              },
-            }),
 
+          fields: [
             defineField({
               name: 'url',
               title: 'Profile URL',
               type: 'url',
-              description: 'Paste full link (https://...)',
+              description:
+                'Paste your full profile link (e.g. https://instagram.com/yourname)',
+              validation: (Rule) =>
+                Rule.uri({
+                  scheme: ['http', 'https'],
+                }).warning('Link should start with https://'),
             }),
           ],
 
           preview: {
             select: {
-              title: 'platform',
-              subtitle: 'url',
+              url: 'url',
             },
-            prepare({ title, subtitle }) {
+            prepare({ url }) {
+              if (!url) {
+                return {
+                  title: 'Social Link',
+                  subtitle: 'No URL added',
+                }
+              }
+
+              let hostname = ''
+              try {
+                hostname = new URL(url).hostname.replace('www.', '')
+              } catch {
+                hostname = 'Invalid URL'
+              }
+
               return {
-                title: title
-                  ? title.charAt(0).toUpperCase() + title.slice(1)
-                  : 'Social Link',
-                subtitle: subtitle || 'No URL added',
+                title: hostname,
+                subtitle: url,
               }
             },
           },
         }),
       ],
+
+      validation: (Rule) =>
+        Rule.max(5).warning('Recommended maximum is 5 social links'),
     }),
   ],
 
@@ -215,6 +147,12 @@ export const moreInfo = defineType({
     select: {
       title: 'heading',
       subtitle: 'email',
+    },
+    prepare({ title, subtitle }) {
+      return {
+        title: title || 'More Info Section',
+        subtitle: subtitle || 'No email set',
+      }
     },
   },
 })
