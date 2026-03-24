@@ -5,8 +5,6 @@ import SlideMenu from "../SlideMenu/page";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "../../../sanity/lib/client";
 
-// Removed unused fetchNavbar function
-
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { data, isLoading, error } = useQuery({
