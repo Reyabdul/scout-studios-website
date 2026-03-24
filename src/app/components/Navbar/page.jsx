@@ -55,10 +55,12 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}>
+      <nav
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+      >
         <div className="w-25 items-center" />
         <div className="flex flex-col items-center flex-1">
-          <span className={`w-16 font-bold text-lg mb-1 animate-pulse bg-gray-200 h-6 rounded`}></span>
+          <span className="w-16 font-bold text-lg mb-1 animate-pulse bg-gray-200 h-6 rounded"></span>
           <div className="flex gap-8 text-sm font-medium">
             <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
             <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
@@ -74,7 +76,9 @@ export default function Navbar() {
 
   if (error) {
     return (
-      <nav className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}>
+      <nav
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+      >
         <div className="w-25 items-center" />
         <div className="flex flex-col items-center flex-1">
           <span className="w-16 font-bold text-lg mb-1 text-red-500">Error</span>
@@ -91,17 +95,19 @@ export default function Navbar() {
 
   // Fallbacks if fields are missing
   const siteName = data?.siteName;
-  // Correct links extraction based on Sanity schema: links is array of { label } objects.
+  // If links from Sanity, structure is [{label: "Works"}, ...]. For fallback, just use string array.
   const links =
     Array.isArray(data?.links) && data.links.length > 0
-      ? data.links.map(link => link?.label || "") // extract label, default to empty string
+      ? data.links
       : ["Works", "Mission", "Contact"];
   const sideBarTitle = data?.sideBarTitle ?? "More Info";
 
   return (
     <>
       {/* NAVBAR */}
-      <nav className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}>
+      <nav
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+      >
         {/* Left spacer */}
         <div className="w-25 items-center" />
 
@@ -121,19 +127,21 @@ export default function Navbar() {
           </span>
           <div className="flex gap-8 text-sm font-medium">
             {links.map((link, idx) => {
-              // Skip if link label is empty string
-              if (!link) return null;
-              // All links have '#' plus lowercased link, no exceptions
+              // Handle both string (fallback) and object with .label (Sanity)
+              const label = typeof link === "string" ? link : link.label;
+              // Ensure label is defined and string before using
+              const labelStr = typeof label === "string" ? label : "";
+              // All links have '#' plus lowercased label, no exceptions
               // e.g. 'Works' -> '#works', 'Contact' -> '#contact'
-              const href = `#${link.toLowerCase()}`;
+              const href = `#${labelStr.toLowerCase()}`;
               return (
                 <a
-                  key={link + idx}
+                  key={labelStr + idx}
                   href={href}
                   className={textColor}
                   style={{ color: invert ? "#FFF" : "#000" }}
                 >
-                  {link}
+                  {labelStr}
                 </a>
               );
             })}

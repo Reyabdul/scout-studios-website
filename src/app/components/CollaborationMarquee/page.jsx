@@ -67,47 +67,27 @@ function MarqueeItem({ item }) {
   );
 }
 
-function MarqueeTrack() {
-  // Duplicate items enough times to fill and loop seamlessly
-  const repeated = [...collaborations, ...collaborations, ...collaborations, ...collaborations];
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0,
-        animation: 'marquee-scroll 28s linear infinite',
-        willChange: 'transform',
-      }}
-    >
-      <div>
-        <h1 className='text-white'>Cololaboration</h1>
-      </div>
-      {repeated.map((item, i) => (
-        <span key={i} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <MarqueeItem item={item} />
-          <Dot />
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function CollaborationsMarquee() {
   return (
     <section
       style={{
         background: '#080c0a',
-        // borderTop: '1px solid rgba(255,255,255,0.08)',
-        // borderBottom: '1px solid rgba(255,255,255,0.08)',
         padding: '1.25rem 0',
         overflow: 'hidden',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <div>
-        <h2 className='text-white flex items-center justify-center pb-8'>Collaborations:</h2>
+      <div style={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+        <h2 className='text-white flex items-center justify-center pb-8' style={{textAlign: 'center'}}>Collaborations:</h2>
       </div>
       {/* Keyframe injection */}
       <style>{`
@@ -151,16 +131,28 @@ export default function CollaborationsMarquee() {
       {/* Scrolling track */}
       <div
         className="marquee-wrapper"
-        style={{ display: 'flex', overflow: 'hidden' }}
+        style={{
+          width: '100%',
+          display: 'flex', 
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}
       >
-        <div className="marquee-track" style={{
-          display: 'flex',
-          alignItems: 'center',
-          animation: 'marquee-scroll 28s linear infinite',
-          willChange: 'transform',
-        }}>
+        <div 
+          className="marquee-track" 
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            animation: 'marquee-scroll 10s linear infinite', // Made 2x faster by halving the duration
+            willChange: 'transform',
+            justifyContent: 'center',
+            width: '100%',
+          }}>
           {[...collaborations, ...collaborations, ...collaborations, ...collaborations].map((item, i) => (
-            <span key={i} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <span 
+              key={i} 
+              style={{ display: 'flex', alignItems: 'center', flexShrink: 0, justifyContent: 'center' }}
+            >
               <MarqueeItem item={item} />
               <Dot />
             </span>

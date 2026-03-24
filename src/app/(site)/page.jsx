@@ -75,19 +75,19 @@ export default function Page() {
               <Works />
 
               {/* Mission → shrinks into Contact on scroll */}
-              <SectionTransition bgColor="white"> 
+              <SectionTransition bgColor="#080c0a"> 
                   <Mission />
                 </SectionTransition>
 
               {/* Collaboration Marquee */}
-              {/* <section className='bg-[#080c0a] h-[30vh] flex items-center justify-center"'>
+              <section className='bg-[#080c0a] h-[30vh] flex items-center justify-center"'>
                   <CollaborationsMarquee />
-                </section> */}
+                </section>
 
               {/* Contact — last section, no transition needed */}
-              {/* <section id="contact" className=" flex items-center justify-center">
+              <section id="contact" className=" flex items-center justify-center">
                   <Contact />
-                </section> */}
+                </section>
 
               {/* Footer fades in */}
               <motion.div
