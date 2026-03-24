@@ -1,6 +1,6 @@
 import { intro } from "./intro"
 import { navbar } from "./navbar"
-import { moreInfo } from "./moreInfo"
+import { moreInfo } from "./sideBar"
 import { footer } from "./footer"
 
 export const schema = {

@@ -11,14 +11,14 @@ export default function Intro({ onFinish }) {
   const [showTitle, setShowTitle] = useState(false); //show and hide title
   const [transition, setTransition] = useState(false); //transitions
 
-//================================================================================================
+  //================================================================================================
   // This effect controls the intro animation timing.
   // - After 1 second, it reveals the title by setting showTitle to true.
   // - After 5 seconds, it begins the transition out:
   //     - Sets 'transition' to true, which likely triggers an animation.
   //     - After another 1 second, it calls the 'onFinish' callback to signal the intro is over.
   // - On cleanup, both timers are cleared to avoid memory leaks.
-  
+
   useEffect(() => {
     const titleTimer = setTimeout(() => {
       setShowTitle(true);
@@ -36,9 +36,8 @@ export default function Intro({ onFinish }) {
   }, [onFinish]);
   // ================================================================================================
 
-
   //Pull 'Titles' from Sanity.io 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["intro page"],
     queryFn: () =>
       client.fetch(`*[_type == "intro"][0]{
@@ -47,7 +46,20 @@ export default function Intro({ onFinish }) {
       }`),
   });
 
+  // Display loading state
   if (isLoading) return <p>Loading...</p>;
+
+  // Display error state
+  if (error) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black text-[#FFC800]">
+        <div className="text-center">
+          <h2 className="font-chillax font-bold text-4xl mb-4">Error</h2>
+          <p className="text-lg">Failed to load intro titles. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -17,24 +17,33 @@ export default function Page() {
   const [showIntro, setShowIntro] = useState(true);
   const [showContent, setShowContent] = useState(false);
 
-  // After intro, fade in Navbar, Home, and Footer after 2s
+  // After intro, fade in Navbar, Home, and Footer after 1s
   useEffect(() => {
     let timer;
     if (!showIntro) {
       timer = setTimeout(() => setShowContent(true), 1000);
-    } else {
-      setShowContent(false);
     }
     return () => clearTimeout(timer);
   }, [showIntro]);
 
+  // When the page loads (and while intro is shown), don't render main content.
+  // Intro logic is commented out below for reference.
+  // To re-enable, uncomment the rendering conditionals.
+
+  // Remove unreachable/unused setShowContent(false) call,
+  // as it was triggering state update on render (see lint warning).
+
   return (
     <>
-      {/* {showIntro ? (
+      {/* 
+      {showIntro ? (
         <Intro onFinish={() => setShowIntro(false)} />
-      ) : ( */}
+      ) : (
+      */}
         <AnimatePresence>
-          {/* {showContent && ( */}
+          {/* 
+          {showContent && (
+          */}
             <>
               {/* Navbar fades in */}
               <motion.div
@@ -66,9 +75,9 @@ export default function Page() {
               <Works />
 
               {/* Mission → shrinks into Contact on scroll */}
-              {/* <SectionTransition bgColor="white">
+              <SectionTransition bgColor="white"> 
                   <Mission />
-                </SectionTransition> */}
+                </SectionTransition>
 
               {/* Collaboration Marquee */}
               {/* <section className='bg-[#080c0a] h-[30vh] flex items-center justify-center"'>
