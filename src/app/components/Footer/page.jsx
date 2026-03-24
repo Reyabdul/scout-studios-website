@@ -4,6 +4,7 @@ export default function Footer() {
       © Scout Studios 2025
     </footer>
   )
+  
  //Get date real-time
   const year = new Date().getFullYear();
 

@@ -30,11 +30,11 @@ export default function Page() {
 
   return (
     <>
-      {showIntro ? (
+      {/* {showIntro ? (
         <Intro onFinish={() => setShowIntro(false)} />
-      ) : (
+      ) : ( */}
         <AnimatePresence>
-          {showContent && (
+          {/* {showContent && ( */}
             <>
               {/* Navbar fades in */}
               <motion.div
@@ -63,7 +63,7 @@ export default function Page() {
               </motion.div>
 
               {/* Works — has its own internal snap, no SectionTransition wrapper */}
-              {/* <Works /> */}
+              <Works />
 
               {/* Mission → shrinks into Contact on scroll */}
               {/* <SectionTransition bgColor="white">
@@ -93,9 +93,9 @@ export default function Page() {
                 <Footer />
               </motion.div>
             </>
-          )}
+          {/* )} */}
         </AnimatePresence>
-      )}
+      {/* )} */}
     </>
   );
 }
