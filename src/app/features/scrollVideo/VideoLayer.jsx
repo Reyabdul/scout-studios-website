@@ -1,64 +1,57 @@
+// features/scrollVideo/VideoLayer.jsx
 'use client';
 
 import { useEffect } from 'react';
-import { motion, useTransform, animate, useMotionValue } from 'framer-motion';
+import { motion, animate, useMotionValue } from 'framer-motion';
 
-const SNAP_DURATION = 0.5;
-const PAUSE_DURATION = 500;
+const SNAP_DURATION   = 0.5;
+const PAUSE_DURATION  = 500;
 const EXPAND_DURATION = 0.5;
 
 export default function VideoLayer({
   video,
   index,
   total,
-  scrollYProgress,
   isActive,
   wasActive,
 }) {
-  const segmentSize = 1 / total;
-  const start = index * segmentSize;
-  const end = start + segmentSize;
-
-  const opacity = useTransform(
-    scrollYProgress,
-    [start, start + segmentSize * 0.15, end - segmentSize * 0.15, end],
-    index === 0 ? [1, 1, 1, 0] : [0, 1, 1, index === total - 1 ? 1 : 0]
-  );
-
-  const scale = useMotionValue(index === 0 ? 1 : 0.5);
+  // All values are now motion values driven manually — no scrollYProgress
+  const opacity      = useMotionValue(index === 0 ? 1 : 0);
+  const scale        = useMotionValue(index === 0 ? 1 : 0.5);
   const borderRadius = useMotionValue(0);
-  const marginX = useMotionValue(0);
+  const marginX      = useMotionValue(0);
 
   useEffect(() => {
     if (wasActive) {
-      animate(scale, 0.5, { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
-      animate(borderRadius, 20, {
-        duration: SNAP_DURATION,
-        ease: [0.76, 0, 0.24, 1],
-      });
-      animate(marginX, 40, { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
+      // Outgoing video: fade out and shrink simultaneously
+      animate(opacity, 0,        { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
+      animate(scale, 0.5,        { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
+      animate(borderRadius, 20,  { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
+      animate(marginX, 40,       { duration: SNAP_DURATION, ease: [0.76, 0, 0.24, 1] });
     }
 
     if (isActive) {
+      // Incoming video: start small and hidden, then pause, then expand to full
+      opacity.set(1);
       scale.set(0.5);
       borderRadius.set(20);
       marginX.set(40);
 
       const timeout = setTimeout(() => {
-        animate(scale, 1, { duration: EXPAND_DURATION, ease: [0.76, 0, 0.24, 1] });
-        animate(borderRadius, 0, {
-          duration: EXPAND_DURATION,
-          ease: [0.76, 0, 0.24, 1],
-        });
-        animate(marginX, 0, { duration: EXPAND_DURATION, ease: [0.76, 0, 0.24, 1] });
+        animate(scale, 1,        { duration: EXPAND_DURATION, ease: [0.76, 0, 0.24, 1] });
+        animate(borderRadius, 0, { duration: EXPAND_DURATION, ease: [0.76, 0, 0.24, 1] });
+        animate(marginX, 0,      { duration: EXPAND_DURATION, ease: [0.76, 0, 0.24, 1] });
       }, PAUSE_DURATION);
 
       return () => clearTimeout(timeout);
     }
-  }, [isActive, wasActive, borderRadius, marginX, scale]);
+  }, [isActive, wasActive]);
 
   return (
-    <motion.div className="absolute inset-0" style={{ opacity }}>
+    <motion.div
+      className="absolute inset-0"
+      style={{ opacity }}
+    >
       <motion.div
         className="w-full h-full overflow-hidden"
         style={{ scale, borderRadius, marginLeft: marginX, marginRight: marginX }}
@@ -75,4 +68,3 @@ export default function VideoLayer({
     </motion.div>
   );
 }
-

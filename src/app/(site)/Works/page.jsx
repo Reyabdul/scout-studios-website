@@ -1,3 +1,4 @@
+// features/scrollVideo/Works.jsx
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -5,11 +6,10 @@ import { animate, useScroll } from 'framer-motion';
 import VideoLayer from '../../features/scrollVideo/VideoLayer';
 import VideoInfo from '../../features/scrollVideo/VideoInfo';
 
-// ---- Timing config ----
-const SNAP_DURATION = 0.5;
-const PAUSE_DURATION = 500;
+const SNAP_DURATION   = 0.5;
+const PAUSE_DURATION  = 500;
 const EXPAND_DURATION = 0.5;
-const LOCK_DURATION = PAUSE_DURATION + EXPAND_DURATION * 1000 + 300;
+const LOCK_DURATION   = PAUSE_DURATION + EXPAND_DURATION * 1000 + 300;
 
 const videos = [
   {
@@ -36,11 +36,13 @@ const videos = [
 ];
 
 export default function Works() {
-  const sectionRef = useRef(null);
+  const sectionRef   = useRef(null);
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState(null);
-  const isAnimating = useRef(false);
+  const [prevIndex, setPrevIndex]     = useState(null);
+  const isAnimating  = useRef(false);
+  // Track whether we've fully settled on the last video
+  const atEnd        = useRef(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -53,6 +55,7 @@ export default function Works() {
     if (clamped === activeIndex) return;
 
     isAnimating.current = true;
+    atEnd.current = false;
     setPrevIndex(activeIndex);
     setActiveIndex(clamped);
 
@@ -67,9 +70,15 @@ export default function Works() {
       ease: [0.3, 0, 0.24, 1],
       onUpdate: (val) => window.scrollTo(0, val),
       onComplete: () => {
+        // Clear wasActive immediately so the expand animation fires cleanly
+        setPrevIndex(null);
+
         setTimeout(() => {
           isAnimating.current = false;
-          setPrevIndex(null);
+          // Mark that we've fully settled on the last video
+          if (clamped === videos.length - 1) {
+            atEnd.current = true;
+          }
         }, LOCK_DURATION);
       },
     });
@@ -77,7 +86,7 @@ export default function Works() {
 
   useEffect(() => {
     const onWheel = (e) => {
-      const section = sectionRef.current;
+      const section   = sectionRef.current;
       const container = containerRef.current;
       if (!section || !container) return;
 
@@ -85,12 +94,26 @@ export default function Works() {
       const inSection = top <= 0 && bottom > 0;
       if (!inSection) return;
 
-      const atStart = activeIndex === 0 && e.deltaY < 0;
-      const atEnd = activeIndex === videos.length - 1 && e.deltaY > 0;
-      if (atStart || atEnd) return;
+      const goingDown = e.deltaY > 0;
+      const goingUp   = e.deltaY < 0;
+
+      // At first video going up — let page scroll naturally out the top
+      if (activeIndex === 0 && goingUp) return;
+
+      // At last video going down — only let scroll through AFTER
+      // the expand animation has fully completed (atEnd.current = true)
+      if (activeIndex === videos.length - 1 && goingDown) {
+        if (!atEnd.current) {
+          // Still animating in — block scroll
+          e.preventDefault();
+          return;
+        }
+        // Settled — let natural scroll take over into next section
+        return;
+      }
 
       e.preventDefault();
-      const direction = e.deltaY > 0 ? 1 : -1;
+      const direction = goingDown ? 1 : -1;
       snapToIndex(activeIndex + direction);
     };
 
@@ -101,37 +124,23 @@ export default function Works() {
   const scrollHeight = `${videos.length * 100}vh`;
 
   return (
-    <main>
-      {/* ─── Scroll-jacked video showcase ─────────────────────────────────── */}
-      <section ref={sectionRef} id="works">
-        <div ref={containerRef} style={{ height: scrollHeight }} className="relative">
-          <div className="sticky top-0 h-screen bg-white overflow-hidden flex items-center justify-center">
-            {videos.map((video, i) => (
-              <VideoLayer
-                key={video.src}
-                video={video}
-                index={i}
-                total={videos.length}
-                scrollYProgress={scrollYProgress}
-                isActive={i === activeIndex}
-                wasActive={i === prevIndex}
-              />
-            ))}
-            <VideoInfo video={videos[activeIndex]} />
-          </div>
+    <section ref={sectionRef} id="works">
+      <div ref={containerRef} style={{ height: scrollHeight }} className="relative">
+        <div className="sticky top-0 h-screen bg-white overflow-hidden flex items-center justify-center">
+          {videos.map((video, i) => (
+            <VideoLayer
+              key={video.src}
+              video={video}
+              index={i}
+              total={videos.length}
+              scrollYProgress={scrollYProgress}
+              isActive={i === activeIndex}
+              wasActive={i === prevIndex}
+            />
+          ))}
+          <VideoInfo video={videos[activeIndex]} />
         </div>
-      </section>
- 
-      {/* ─── Rest of your Works content below ──────────────────────────────
-          The scroll lock auto-releases once the user passes the last video,
-          so everything below scrolls normally.
-      ──────────────────────────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 2rem', background: '#fff', color: '#fff' }}>
-        <p style={{ opacity: 0.5, fontSize: '0.9rem' }}>
-          {/* Your project grid, case studies, etc. go here */}
-          More works content…
-        </p>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }

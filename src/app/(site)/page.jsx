@@ -1,47 +1,101 @@
+// app/page.jsx
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import Intro from "../components/IntroVideo/page";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import SectionTransition from "../components/SectionTransition";
 import Home from "./Home/page";
+import Works from "./Works/page";
 import Mission from "./Mission/page";
+import Contact from "./Contact/page";
 import Navbar from "../components/Navbar/page";
 import Footer from "../components/Footer/page";
-import Works from "./Works/page";
+import CollaborationsMarquee from "../components/CollaborationMarquee/page";
+import Intro from "../components/IntroVideo/page";
 
 export default function Page() {
   const [showIntro, setShowIntro] = useState(true);
+  const [showContent, setShowContent] = useState(false);
+
+  // After intro, fade in Navbar, Home, and Footer after 2s
+  useEffect(() => {
+    let timer;
+    if (!showIntro) {
+      timer = setTimeout(() => setShowContent(true), 1000);
+    } else {
+      setShowContent(false);
+    }
+    return () => clearTimeout(timer);
+  }, [showIntro]);
 
   return (
     <>
-      {/* {showIntro ? (
+      {showIntro ? (
         <Intro onFinish={() => setShowIntro(false)} />
-      ) : ( */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3, duration: 1.2, ease: "easeOut" }}
-      >
-        <Navbar />
-        <main className="min-h-screen pt-20.5 pb-16">
-          <section id="home" className="snap-start h-screen">
-            <Home />
-          </section>
-          <section id="works">
-            <Works />
-          </section>
+      ) : (
+        <AnimatePresence>
+          {showContent && (
+            <>
+              {/* Navbar fades in */}
+              <motion.div
+                key="navbar"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="fixed w-full z-50"
+                style={{ top: 0, left: 0 }}
+              >
+                <Navbar />
+              </motion.div>
 
-          <section id="mission" className="snap-start h-screen">
-            <Mission />
-          </section>
-          {/* 
-      <section id="contact" className="snap-start h-screen">
-        <ContactSection />
-      </section> */}
-        </main>
-        <Footer />
-      </motion.div>
-      {/* )} */}
+              {/* Home fades in */}
+              <motion.div
+                key="home"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut", delay: 0.05 }}
+              >
+                <SectionTransition bgColor="white">
+                  <Home />
+                </SectionTransition>
+              </motion.div>
+
+              {/* Works — has its own internal snap, no SectionTransition wrapper */}
+              {/* <Works /> */}
+
+              {/* Mission → shrinks into Contact on scroll */}
+              {/* <SectionTransition bgColor="white">
+                  <Mission />
+                </SectionTransition> */}
+
+              {/* Collaboration Marquee */}
+              {/* <section className='bg-[#080c0a] h-[30vh] flex items-center justify-center"'>
+                  <CollaborationsMarquee />
+                </section> */}
+
+              {/* Contact — last section, no transition needed */}
+              {/* <section id="contact" className=" flex items-center justify-center">
+                  <Contact />
+                </section> */}
+
+              {/* Footer fades in */}
+              <motion.div
+                key="footer"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="w-full"
+                style={{ position: "fixed", bottom: 0, left: 0, zIndex: 30 }}
+              >
+                <Footer />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 }

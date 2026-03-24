@@ -10,6 +10,7 @@ export default function Navbar() {
     <>
       {/* NAVBAR */}
       <nav className="fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40">
+
         {/* Left spacer */}
         <div className=" w-25 items-center" />
 

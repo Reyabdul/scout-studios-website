@@ -6,9 +6,19 @@ import { useQuery } from "@tanstack/react-query";
 import { client } from "../../../sanity/lib/client";
 
 export default function Intro({ onFinish }) {
-  const [showTitle, setShowTitle] = useState(false);
-  const [transition, setTransition] = useState(false);
 
+  //Animations
+  const [showTitle, setShowTitle] = useState(false); //show and hide title
+  const [transition, setTransition] = useState(false); //transitions
+
+//================================================================================================
+  // This effect controls the intro animation timing.
+  // - After 1 second, it reveals the title by setting showTitle to true.
+  // - After 5 seconds, it begins the transition out:
+  //     - Sets 'transition' to true, which likely triggers an animation.
+  //     - After another 1 second, it calls the 'onFinish' callback to signal the intro is over.
+  // - On cleanup, both timers are cleared to avoid memory leaks.
+  
   useEffect(() => {
     const titleTimer = setTimeout(() => {
       setShowTitle(true);
@@ -17,14 +27,17 @@ export default function Intro({ onFinish }) {
     const transitionTimer = setTimeout(() => {
       setTransition(true);
       setTimeout(onFinish, 1000);
-    }, 10000);
+    }, 5000);
 
     return () => {
       clearTimeout(titleTimer);
       clearTimeout(transitionTimer);
     };
   }, [onFinish]);
+  // ================================================================================================
 
+
+  //Pull 'Titles' from Sanity.io 
   const { data, isLoading } = useQuery({
     queryKey: ["intro page"],
     queryFn: () =>
@@ -47,7 +60,7 @@ export default function Intro({ onFinish }) {
         playsInline
         className="absolute w-full h-full object-cover"
       >
-        <source src="/video/test1.mp4" type="video/mp4" />
+        <source src="/videos/test1.mp4" type="video/mp4" />
       </video>
 
       <AnimatePresence>
