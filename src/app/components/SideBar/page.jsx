@@ -4,16 +4,67 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PortableText } from "@portabletext/react";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "../../../sanity/lib/client";
+import Divider from "./Divider";
 
-// Example: Add your supported icons here, matching Sanity's platform string to an icon component.
 import { FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
 
 const iconMap = {
   instagram: FaInstagram,
   linkedin: FaLinkedin,
   twitter: FaTwitter,
-  // Add more mappings as necessary
 };
+
+/* ---------------- ANIMATION VARIANTS ---------------- */
+
+const panelVariant = {
+  hidden: { x: "100%" },
+  show: {
+    x: 0,
+    transition: {
+      duration: 0.35,
+      ease: "easeInOut",
+      when: "beforeChildren",
+    },
+  },
+  exit: {
+    x: "100%",
+    transition: {
+      duration: 0.3,
+      ease: "easeInOut",
+      when: "afterChildren",
+    },
+  },
+};
+
+const container = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.4,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
+  },
+};
+
+const dividerGroup = {
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.6, // appears AFTER text
+    },
+  },
+};
+
+/* ---------------- COMPONENT ---------------- */
 
 export default function SideBar({ open, setOpen }) {
   const { data, isLoading, error } = useQuery({
@@ -22,103 +73,115 @@ export default function SideBar({ open, setOpen }) {
   });
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {open && (
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black z-40"
+            className="fixed inset-0 bg-black z-30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.4 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={() => setOpen(false)}
           />
 
           {/* Panel */}
           <motion.div
-            className="fixed top-0 right-0 h-full w-full sm:w-1/2 md:w-1/3 bg-[#f5f5f5] z-50 px-8 py-6 flex flex-col overflow-y-auto"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            variants={panelVariant}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            className="fixed top-0 right-0 h-full w-full sm:w-1/2 md:w-1/3 z-50 px-8 py-6 flex flex-col overflow-y-auto"
+            style={{
+              background: "rgba(255,255,255,0.76)",
+              backdropFilter: "blur(9px) saturate(170%)",
+              WebkitBackdropFilter: "blur(9px) saturate(170%)",
+              boxShadow: "0 8px 32px rgba(31, 38, 135, 0.13)",
+              border: "1px solid rgba(255,255,255,0.5)",
+            }}
           >
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-              <h1 className="text-xl font-bold uppercase tracking-tight">
-                {data?.heading || "Scout Studios"}
-              </h1>
-
-              <button
-                onClick={() => setOpen(false)}
-                className="text-sm border border-black w-6 h-6 flex items-center justify-center"
+            <motion.div variants={container}>
+              
+              {/* Header */}
+              <motion.div
+                variants={item}
+                className="flex items-start justify-between mb-1"
               >
-                ✕
-              </button>
-            </div>
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {data?.heading || "Scout Studios"}
+                </h1>
 
-            {/* Divider */}
-            <div className="border-t border-black mb-6" />
+                <button
+                  onClick={() => setOpen(false)}
+                  className="text-sm border border-black w-4 h-4 flex items-center justify-center"
+                >
+                  ✕
+                </button>
+              </motion.div>
 
-            {/* Body */}
-            {isLoading ? (
-              <p>Loading...</p>
-            ) : error ? (
-              <p className="text-red-500">Error loading content</p>
-            ) : (
-              <>
-                {/* Paragraph */}
-                <div className="text-sm leading-relaxed space-y-4 mb-8">
-                  {data?.body && <PortableText value={data.body} />}
-                </div>
+              {/* Divider Group */}
+              <motion.div variants={dividerGroup}>
+                <Divider className="mb-6 border-4" />
+              </motion.div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-400 mb-6" />
+              {/* Content */}
+              {isLoading ? (
+                <p>Loading...</p>
+              ) : error ? (
+                <p className="text-red-500">Error loading content</p>
+              ) : (
+                <>
+                  {/* Paragraph */}
+                  <motion.div variants={item} className="mb-8 text-sm">
+                    <PortableText value={data?.body} />
+                  </motion.div>
 
-                {/* Services */}
-                <div className="mb-8">
-                  <h2 className="text-sm font-semibold mb-4">Services</h2>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    {Array.isArray(data?.services) &&
-                      data.services.map((service, idx) => (
-                        <p key={idx}>{service}</p>
+                  <motion.div variants={dividerGroup}>
+                    <Divider className="mb-6" />
+                  </motion.div>
+
+                  {/* Services */}
+                  <motion.div variants={item} className="mb-8">
+                    <h2 className="text-sm font-semibold mb-4">Services</h2>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                      {data?.services?.map((s, i) => (
+                        <p key={i}>{s}</p>
                       ))}
-                  </div>
-                </div>
+                    </div>
+                  </motion.div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-400 mb-6" />
+                  <motion.div variants={dividerGroup}>
+                    <Divider className="mb-6" />
+                  </motion.div>
 
-                {/* Contact */}
-                <div className="mb-8">
-                  <h2 className="text-sm font-semibold mb-2">Contact</h2>
-                  <p className="text-sm">{data?.email}</p>
-                </div>
+                  {/* Contact */}
+                  <motion.div variants={item} className="mb-8">
+                    <h2 className="text-sm font-semibold mb-2">Contact</h2>
+                    <p>{data?.email}</p>
+                  </motion.div>
 
-                {/* Divider */}
-                <div className="border-t border-gray-400 mb-6" />
+                  <motion.div variants={dividerGroup}>
+                    <Divider className="mb-6" />
+                  </motion.div>
 
-                {/* Social Icons */}
-                <div className="flex gap-6 text-xl">
-                  {Array.isArray(data?.socialmedia) &&
-                    data.socialmedia.map((item, idx) => {
-                      const Icon = iconMap[item.platform?.toLowerCase?.() || ""];
-                      if (!Icon || !item.url) return null;
+                  {/* Social */}
+                  <motion.div variants={item} className="flex gap-6 text-xl">
+                    {data?.socialmedia?.map((item, i) => {
+                      const Icon =
+                        iconMap[item.platform?.toLowerCase?.() || ""];
+                      if (!Icon) return null;
+
                       return (
-                        <a
-                          key={idx}
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={item.platform}
-                          className="hover:opacity-60 transition"
-                        >
+                        <a key={i} href={item.url} target="_blank">
                           <Icon />
                         </a>
                       );
                     })}
-                </div>
-              </>
-            )}
+                  </motion.div>
+                </>
+              )}
+            </motion.div>
           </motion.div>
         </>
       )}

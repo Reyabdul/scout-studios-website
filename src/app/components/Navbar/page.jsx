@@ -140,9 +140,7 @@ export default function Navbar() {
   return (
     <>
       {/* NAVBAR */}
-      <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
-      >
+      <nav className="fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-50">
         <div className="absolute left-8 flex items-center h-full">
           {/* Empty left-aligned spacer. Hide from screen readers. */}
           <div className="w-25" aria-hidden="true" />
@@ -164,7 +162,7 @@ export default function Navbar() {
                   className={`w-2 h-2 rounded-full ${dotBg}`}
                   style={{
                     backgroundColor: "transparent",
-                    border: `2px solid ${borderColor}`
+                    border: `1px solid black`
                   }}
                 />
               ))}
@@ -173,7 +171,6 @@ export default function Navbar() {
         </div>
       </nav>
       {/* SLIDE MENU - open and close are controlled by open/setOpen */}
-      <SideBar open={open} setOpen={setOpen} />
-    </>
+      <SideBar open={open} setOpen={setOpen} /></>
   );
 }
