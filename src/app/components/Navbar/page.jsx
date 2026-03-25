@@ -53,13 +53,58 @@ export default function Navbar() {
   // Handler to close menu for accessibility (e.g. esc key, can be expanded)
   const closeMenu = useCallback(() => setOpen(false), []);
 
+  // Fallbacks if fields are missing
+  const siteName = data?.siteName;
+  // Sanity: [{label: ...}], fallback: ["Works",...]
+  const links =
+    Array.isArray(data?.links) && data.links.length > 0
+      ? data.links
+      : ["Works", "Mission", "Contact"];
+  const sideBarTitle = data?.sideBarTitle ?? "More Info";
+
+  // Main navigation content to ensure center alignment
+  const navContent = (
+    <div className="flex flex-col items-center">
+      <span className="w-16 font-bold text-lg mb-1">
+        <a
+          href="#home"
+          className={`block text-center border-b-2 ${textColor}`}
+          style={{
+            borderColor: invert ? "#FFF" : "#000",
+            borderBottomWidth: "2px",
+            borderBottomStyle: "solid"
+          }}>
+          {siteName}
+        </a>
+      </span>
+      <div className="flex gap-8 text-sm font-medium">
+        {links.map((link, idx) => {
+          // Support objects from Sanity and fallback to string
+          const label = typeof link === "string" ? link : link.label;
+          const labelStr = typeof label === "string" ? label : "";
+          const href = `#${labelStr.toLowerCase()}`;
+          return (
+            <a
+              key={labelStr + idx}
+              href={href}
+              className={textColor}
+              style={{ color: invert ? "#FFF" : "#000" }}
+            >
+              {labelStr}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Loading & error placeholders centered
   if (isLoading) {
     return (
       <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
       >
-        <div className="w-25 items-center" />
-        <div className="flex flex-col items-center flex-1">
+        <div className="flex flex-col items-center">
           <span className="w-16 font-bold text-lg mb-1 animate-pulse bg-gray-200 h-6 rounded"></span>
           <div className="flex gap-8 text-sm font-medium">
             <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
@@ -67,7 +112,7 @@ export default function Navbar() {
             <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
           </div>
         </div>
-        <button type="button" className="font-small leading-0.5" disabled>
+        <button type="button" className="font-small leading-0.5 ml-8" disabled>
           <span className="text-lg bg-gray-200 w-20 inline-block h-4 rounded animate-pulse"></span>
         </button>
       </nav>
@@ -77,101 +122,57 @@ export default function Navbar() {
   if (error) {
     return (
       <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
       >
-        <div className="w-25 items-center" />
-        <div className="flex flex-col items-center flex-1">
+        <div className="flex flex-col items-center">
           <span className="w-16 font-bold text-lg mb-1 text-red-500">Error</span>
           <div className="flex gap-8 text-sm font-medium">
             <span>Error loading navbar</span>
           </div>
         </div>
-        <button type="button" className="font-small leading-0.5" disabled>
+        <button type="button" className="font-small leading-0.5 ml-8" disabled>
           <span className="text-lg">...</span>
         </button>
       </nav>
     );
   }
 
-  // Fallbacks if fields are missing
-  const siteName = data?.siteName;
-  // If links from Sanity, structure is [{label: "Works"}, ...]. For fallback, just use string array.
-  const links =
-    Array.isArray(data?.links) && data.links.length > 0
-      ? data.links
-      : ["Works", "Mission", "Contact"];
-  const sideBarTitle = data?.sideBarTitle ?? "More Info";
-
   return (
     <>
       {/* NAVBAR */}
       <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-between px-8 bg-transparent z-40 ${textColor}`}
+        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
       >
-        {/* Left spacer */}
-        <div className="w-25 items-center" />
-
-        {/* Center navigation */}
-        <div className="flex flex-col items-center flex-1">
-          <span className="w-16 font-bold text-lg mb-1">
-            <a
-              href="#home"
-              className={`block text-center border-b-2 ${textColor}`}
-              style={{
-                borderColor: invert ? "#FFF" : "#000",
-                borderBottomWidth: "2px",
-                borderBottomStyle: "solid"
-              }}>
-              {siteName}
-            </a>
-          </span>
-          <div className="flex gap-8 text-sm font-medium">
-            {links.map((link, idx) => {
-              // Handle both string (fallback) and object with .label (Sanity)
-              const label = typeof link === "string" ? link : link.label;
-              // Ensure label is defined and string before using
-              const labelStr = typeof label === "string" ? label : "";
-              // All links have '#' plus lowercased label, no exceptions
-              // e.g. 'Works' -> '#works', 'Contact' -> '#contact'
-              const href = `#${labelStr.toLowerCase()}`;
-              return (
-                <a
-                  key={labelStr + idx}
-                  href={href}
-                  className={textColor}
-                  style={{ color: invert ? "#FFF" : "#000" }}
-                >
-                  {labelStr}
-                </a>
-              );
-            })}
-          </div>
+        <div className="absolute left-8 flex items-center h-full">
+          {/* Empty left-aligned spacer. Hide from screen readers. */}
+          <div className="w-25" aria-hidden="true" />
         </div>
-
-        {/* Right button */}
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className={`font-small leading-0.5 bg-transparent flex flex-col items-center ${textColor}`}
-          aria-label="Open sidebar"
-        >
-          <span className={`text-sm ${textColor}`}>{sideBarTitle}</span>
-          <div className="flex gap-1 mt-1">
-            {[0, 1, 2].map(i => (
-              <span
-                key={i}
-                className={`w-2 h-2 rounded-full ${dotBg}`}
-                style={{
-                  backgroundColor: "transparent",
-                  border: `2px solid ${borderColor}`
-                }}
-              />
-            ))}
-          </div>
-        </button>
+        {/* Center nav -- content is centered using justify-center on parent flex */}
+        {navContent}
+        <div className="absolute right-8 flex items-center h-full">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className={`font-small leading-0.5 bg-transparent flex flex-col items-center ${textColor}`}
+            aria-label="Open sidebar"
+          >
+            <span className={`text-sm ${textColor}`}>{sideBarTitle}</span>
+            <div className="flex gap-1 mt-1">
+              {[0, 1, 2].map(i => (
+                <span
+                  key={i}
+                  className={`w-2 h-2 rounded-full ${dotBg}`}
+                  style={{
+                    backgroundColor: "transparent",
+                    border: `2px solid ${borderColor}`
+                  }}
+                />
+              ))}
+            </div>
+          </button>
+        </div>
       </nav>
-      {/* SLIDE MENU - open and close are controlled by open/setOpen.
-          SlideMenu handles closing on overlay click or X button internally using setOpen(false). */}
+      {/* SLIDE MENU - open and close are controlled by open/setOpen */}
       <SideBar open={open} setOpen={setOpen} />
     </>
   );

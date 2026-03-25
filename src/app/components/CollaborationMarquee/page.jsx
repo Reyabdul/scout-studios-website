@@ -79,6 +79,7 @@ export default function CollaborationsMarquee() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        height: '100vh', // Set section height to 70vh
       }}
     >
       <div style={{

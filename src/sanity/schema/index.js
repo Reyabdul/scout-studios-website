@@ -2,12 +2,14 @@ import { intro } from "./intro"
 import { navbar } from "./navbar"
 import { moreInfo } from "./sideBar"
 import { footer } from "./footer"
+import { works } from "./works"
 
 export const schema = {
   types: [
     intro,
     navbar,
     moreInfo,
-    footer
+    footer,
+    works
   ],
 }

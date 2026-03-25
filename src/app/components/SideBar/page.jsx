@@ -36,7 +36,7 @@ export default function SideBar({ open, setOpen }) {
 
           {/* Panel */}
           <motion.div
-            className="fixed top-0 right-0 h-full w-full sm:w-1/2 md:w-[420px] bg-[#f5f5f5] z-50 px-8 py-6 flex flex-col overflow-y-auto"
+            className="fixed top-0 right-0 h-full w-full sm:w-1/2 md:w-1/3 bg-[#f5f5f5] z-50 px-8 py-6 flex flex-col overflow-y-auto"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}

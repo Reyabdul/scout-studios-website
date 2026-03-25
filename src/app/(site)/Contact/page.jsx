@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import CollaborationsMarquee from '../../components/CollaborationMarquee/page';
 
 const EMAIL = 'you@yourdomain.com'; // ← replace with your email
 
@@ -41,10 +42,10 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="relative w-full h-[50vh] flex flex-col items-center justify-center overflow-hidden"
+      className="relative w-full h-[50vh] flex flex-col items-center justify-center mb-20 overflow-hidden"
       style={{ background: '#080c0a' }}
     >
-
+      
       {/* Top rule */}
       <motion.div
         className="absolute w-4/5"
