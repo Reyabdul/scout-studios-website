@@ -115,3 +115,30 @@ h1, h2, h3, h4, h5, h6 {
 ========================================
   5. Component Syles
 ======================================== */
+
+@keyframes collab-marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.collab-marquee-track {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  will-change: transform;
+  animation: collab-marquee-scroll 25s linear infinite;
+}
+
+.collab-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collab-marquee-track {
+    animation: none;
+  }
+}

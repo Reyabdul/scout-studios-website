@@ -1,15 +1,59 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { client } from '../../../sanity/lib/client';
 
-const EMAIL = 'you@yourdomain.com';
+const contactQuery = `*[_type == "contact"][0]{
+  cta,
+  tagline,
+  email
+}`;
+
+function useContact() {
+  return useQuery({
+    queryKey: ['contact'],
+    queryFn: () => client.fetch(contactQuery),
+    staleTime: 1000 * 60 * 5,
+  });
+}
 
 export default function Contact() {
+  const { data, isLoading, error } = useContact();
+
+  const sectionClassName =
+    'relative bg-[#080c0a] py-32 flex flex-col items-center gap-10 text-center';
+
+  if (isLoading) {
+    return (
+      <section id="contact" className={sectionClassName}>
+        <p className="text-white/50">Loading contact…</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="contact" className={sectionClassName}>
+        <p className="text-white/50">
+          Failed to load contact. Please try again later.
+        </p>
+      </section>
+    );
+  }
+
+  const { cta, tagline, email } = data ?? {};
+
+  if (!cta || !tagline || !email) {
+    return (
+      <section id="contact" className={sectionClassName}>
+        <p className="text-white/50">No contact section published yet.</p>
+      </section>
+    );
+  }
+
   return (
-    <section
-      id="contact"
-      className="relative bg-[#080c0a] py-32 flex flex-col items-center gap-10 text-center"
-    >
+    <section id="contact" className={sectionClassName}>
       {/* Top divider */}
       <motion.div
         className="w-full max-w-4xl h-px bg-white/20"
@@ -24,18 +68,18 @@ export default function Contact() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
       >
-        Let’s build something meaningful together.
+        {tagline}
       </motion.p>
 
       {/* Main CTA */}
       <motion.a
-        href={`mailto:${EMAIL}`}
+        href={`mailto:${email}`}
         className="group relative inline-block"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
       >
         <span className="text-5xl md:text-6xl font-black tracking-tight text-white transition-all duration-300 group-hover:text-[#F5C832] group-hover:scale-95">
-          GET IN TOUCH
+          {cta}
         </span>
 
         {/* underline animation */}

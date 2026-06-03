@@ -6,12 +6,13 @@ import { useQuery } from '@tanstack/react-query';
 import { client } from '../../../sanity/lib/client';
 import VideoLayer from '../../features/scrollVideo/VideoLayer';
 import VideoInfo from '../../features/scrollVideo/VideoInfo';
+import {
+  SNAP_DURATION,
+  EASE,
+  LOCK_DURATION,
+} from '../../features/scrollVideo/animationTiming';
 
-const SNAP_DURATION   = 0.5;
-const PAUSE_DURATION  = 500;
-const EXPAND_DURATION = 0.5;
-const LOCK_DURATION   = PAUSE_DURATION + EXPAND_DURATION * 1000 + 300;
-
+// Local mp4 paths — paired with Sanity works by `order` (1-based)
 const LOCAL_VIDEO_SOURCES = [
   '/videos/test1.mp4',
   '/videos/test2.mp4',
@@ -28,6 +29,7 @@ const worksQuery = `*[_type == "works"] | order(order asc) {
   order
 }`;
 
+// Match each local video to a Sanity doc; skip slots with no published work
 function mergeWorksWithLocalVideos(works) {
   const sorted = works ?? [];
   return LOCAL_VIDEO_SOURCES.map((src, index) => {
@@ -56,12 +58,12 @@ export default function Works() {
   const { data, isLoading, error } = useWorks();
   const videos = mergeWorksWithLocalVideos(data);
 
-  const sectionRef   = useRef(null);
-  const containerRef = useRef(null);
+  const sectionRef   = useRef(null);   // bounds check for wheel hijack
+  const containerRef = useRef(null);   // tall scroll area; height / count = snap step
   const [activeIndex, setActiveIndex] = useState(0);
-  const [prevIndex, setPrevIndex]     = useState(null);
-  const isAnimating  = useRef(false);
-  const atEnd        = useRef(false);
+  const [prevIndex, setPrevIndex]     = useState(null); // drives outgoing VideoLayer
+  const isAnimating  = useRef(false);  // blocks rapid wheel snaps
+  const atEnd        = useRef(false);  // last slide: allow scroll into next section
 
   const snapToIndex = useCallback((index) => {
     if (isAnimating.current || videos.length === 0) return;
@@ -76,16 +78,19 @@ export default function Works() {
     const container = containerRef.current;
     if (!container) return;
 
+    // Each video gets one viewport of scroll height inside the container
     const sectionHeight = container.offsetHeight / videos.length;
     const targetY = container.offsetTop + sectionHeight * clamped;
 
-    animate(window.scrollY, targetY, {
+    const startY = window.scrollY;
+    animate(startY, targetY, {
       duration: SNAP_DURATION,
-      ease: [0.3, 0, 0.24, 1],
+      ease: EASE,
       onUpdate: (val) => window.scrollTo(0, val),
       onComplete: () => {
         setPrevIndex(null);
 
+        // Stay locked until VideoLayer pause + expand finish (see animationTiming.js)
         setTimeout(() => {
           isAnimating.current = false;
           if (clamped === videos.length - 1) {
@@ -111,8 +116,10 @@ export default function Works() {
       const goingDown = e.deltaY > 0;
       const goingUp   = e.deltaY < 0;
 
+      // Let native scroll take over above the first slide
       if (activeIndex === 0 && goingUp) return;
 
+      // Last slide: block scroll-down until expand completes, then release to next section
       if (activeIndex === videos.length - 1 && goingDown) {
         if (!atEnd.current) {
           e.preventDefault();
@@ -159,6 +166,7 @@ export default function Works() {
 
   return (
     <section ref={sectionRef} id="works">
+      {/* Tall track: scroll position selects activeIndex via snapToIndex */}
       <div ref={containerRef} style={{ height: scrollHeight }} className="relative">
         <div className="sticky top-0 h-screen bg-white overflow-hidden flex items-center justify-center">
           {videos.map((video, i) => (

@@ -2,19 +2,54 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-
-const images = [
-  '/images/logo.png',
-  '/images/filler1.jpg',
-  '/images/filler2.jpg',
-  '/images/filler3.jpg',
-];
+import { useQuery } from '@tanstack/react-query';
+import { client } from '../../../sanity/lib/client';
+import { urlFor } from '../../../sanity/lib/image';
 
 const OFFSET_X = 20;
 const OFFSET_Y = 20;
 
+const missionQuery = `*[_type == "mission"][0]{
+  body,
+  heading,
+  images[]{
+    alt,
+    asset
+  }
+}`;
+
+function mapMissionImages(images) {
+  if (!images?.length) return [];
+  return images.map((img) => ({
+    src: urlFor(img).width(440).height(600).url(),
+    alt: img.alt ?? '',
+  }));
+}
+
+function useMission() {
+  return useQuery({
+    queryKey: ['mission'],
+    queryFn: () => client.fetch(missionQuery),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+const sectionStyle = {
+  position: 'relative',
+  minHeight: '100vh',
+  background: '#080c0a',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 6vw',
+  overflow: 'hidden',
+};
+
 export default function Mission() {
-  const sectionRef  = useRef(null);
+  const { data, isLoading, error } = useMission();
+  const images = mapMissionImages(data?.images);
+  const statement = data?.body ?? '';
+
+  const sectionRef = useRef(null);
   const [isInside, setIsInside] = useState(false);
   const [imgIndex, setImgIndex] = useState(0);
   const intervalRef = useRef(null);
@@ -32,21 +67,44 @@ export default function Mission() {
     rawY.set(e.clientY - rect.top);
   };
 
-  const handleMouseEnter = () => {
-    setIsInside(true);
+  const handleMouseEnter = () => setIsInside(true);
+  const handleMouseLeave = () => setIsInside(false);
+
+  useEffect(() => {
+    if (!isInside || images.length === 0) return;
     intervalRef.current = setInterval(() => {
       setImgIndex((prev) => (prev + 1) % images.length);
     }, 3000);
-  };
-
-  const handleMouseLeave = () => {
-    setIsInside(false);
-    clearInterval(intervalRef.current);
-  };
-
-  useEffect(() => {
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [isInside, images.length]);
+
+  const activeImgIndex = images.length > 0 ? imgIndex % images.length : 0;
+
+  if (isLoading) {
+    return (
+      <section id="mission" style={sectionStyle}>
+        <p style={{ color: 'rgba(245, 200, 50, 0.5)' }}>Loading mission…</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="mission" style={sectionStyle}>
+        <p style={{ color: 'rgba(245, 200, 50, 0.5)' }}>
+          Failed to load mission. Please try again later.
+        </p>
+      </section>
+    );
+  }
+
+  if (!statement) {
+    return (
+      <section id="mission" style={sectionStyle}>
+        <p style={{ color: 'rgba(245, 200, 50, 0.5)' }}>No mission published yet.</p>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -56,17 +114,10 @@ export default function Mission() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        position: 'relative',
-        minHeight: '100vh',
-        background: '#080c0a',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 6vw',
-        overflow: 'hidden',
+        ...sectionStyle,
         cursor: 'none',
       }}
     >
-      {/* ── Headline text ─────────────────────────────────────── */}
       <h2
         style={{
           fontFamily: '"Arial Black", "Arial Bold", sans-serif',
@@ -80,54 +131,54 @@ export default function Mission() {
           userSelect: 'none',
         }}
       >
-        A Toronto based creative studio help folks cook up cool things.
+        {statement}
       </h2>
 
-      {/* ── Cursor-following image — floats above everything ───── */}
-      <motion.div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          x,
-          y,
-          translateX: `${OFFSET_X}px`,
-          translateY: `${OFFSET_Y}px`,
-          width: '220px',
-          height: '300px',
-          pointerEvents: 'none',
-          zIndex: 10,          // ← above text and everything else
-          borderRadius: '4px',
-          overflow: 'hidden',
-        }}
-        animate={{
-          opacity: isInside ? 1 : 0,
-          scale: isInside ? 1 : 0.85,
-        }}
-        transition={{ duration: 0.35, ease: [0.76, 0, 0.24, 1] }}
-      >
-        {images.map((src, i) => (
-          <motion.img
-            key={src}
-            src={src}
-            alt=""
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-            animate={{
-              opacity: i === imgIndex ? 1 : 0,
-              scale:   i === imgIndex ? 1 : 1.04,
-            }}
-            transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-          />
-        ))}
-      </motion.div>
+      {images.length > 0 && (
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            x,
+            y,
+            translateX: `${OFFSET_X}px`,
+            translateY: `${OFFSET_Y}px`,
+            width: '220px',
+            height: '300px',
+            pointerEvents: 'none',
+            zIndex: 10,
+            borderRadius: '4px',
+            overflow: 'hidden',
+          }}
+          animate={{
+            opacity: isInside ? 1 : 0,
+            scale: isInside ? 1 : 0.85,
+          }}
+          transition={{ duration: 0.35, ease: [0.76, 0, 0.24, 1] }}
+        >
+          {images.map((img, i) => (
+            <motion.img
+              key={img.src}
+              src={img.src}
+              alt={img.alt}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+              animate={{
+                opacity: i === activeImgIndex ? 1 : 0,
+                scale: i === activeImgIndex ? 1 : 1.04,
+              }}
+              transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+            />
+          ))}
+        </motion.div>
+      )}
 
-      {/* ── Custom cursor dot — always on top ─────────────────── */}
       <motion.div
         style={{
           position: 'absolute',

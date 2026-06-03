@@ -1,8 +1,10 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { SNAP_DURATION, PAUSE_DURATION, EXPAND_DURATION, EASE } from './animationTiming';
 
-const TEXT_DELAY = 0.5;
+// Show title/metadata when incoming video starts expanding (matches VideoLayer pause)
+const TEXT_DELAY = PAUSE_DURATION / 1000;
 
 export default function VideoInfo({ video }) {
   const variants = {
@@ -10,12 +12,12 @@ export default function VideoInfo({ video }) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.76, 0, 0.24, 1], delay: TEXT_DELAY },
+      transition: { duration: EXPAND_DURATION, ease: EASE, delay: TEXT_DELAY },
     },
     exit: {
       opacity: 0,
       y: -20,
-      transition: { duration: 0.3, ease: [0.76, 0, 0.24, 1], delay: 0 },
+      transition: { duration: SNAP_DURATION, ease: EASE, delay: 0 },
     },
   };
 

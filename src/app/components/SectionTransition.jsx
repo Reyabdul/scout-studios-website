@@ -5,38 +5,45 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { motion, animate, useMotionValue } from 'framer-motion';
 import { scrollLock } from '../lib/scrollManager';
 
-const SNAP_DURATION   = 0.5;
-const PAUSE_DURATION  = 500;
-const EXPAND_DURATION = 0.5;
+// ─── Animation tuning (adjust these first) ───────────────────────────────────
+// SNAP_DURATION: seconds for shrink-in-place and for scroll-up snap-to-top
+const SNAP_DURATION   = 0.3;
+// PAUSE_DURATION: ms to hold the shrunk frame before scrolling to next section
+const PAUSE_DURATION  = 250;
+// EXPAND_DURATION: seconds for the scroll-down handoff after the pause
+const EXPAND_DURATION = 0.35;
+// EASE: cubic-bezier for all motion; [0.76, 0, 0.24, 1] = quick start, soft land
+const EASE = [0.76, 0, 0.24, 1];
 
 export default function SectionTransition({
   children,
-  bgColor    = '#F5C832',
-  minScale   = 0.78,
-  maxRadius  = 20,
-  maxMargin  = 40,
+  bgColor    = '#F5C832', // visible frame around content when shrunk
+  minScale   = 0.78,      // how small content gets during exit (0–1)
+  maxRadius  = 20,        // corner radius at peak shrink (px)
+  maxMargin  = 40,        // horizontal inset at peak shrink (px)
 }) {
   const sectionRef  = useRef(null);
-  const isAnimating = useRef(false);
+  const isAnimating = useRef(false); // blocks overlapping wheel-triggered runs
   const [isExiting, setIsExiting] = useState(false);
 
+  // Framer motion values — animated in shrinkOut, reset on complete
   const scale        = useMotionValue(1);
   const borderRadius = useMotionValue(0);
   const marginX      = useMotionValue(0);
 
-  // Fix the error of animating window.scrollY directly since it's a read-only property
-  // Instead, animate from current scroll position to target
+  // Scroll down: shrink sticky content, pause, then scroll past this section
   const shrinkOut = useCallback(() => {
     if (isAnimating.current || scrollLock.locked) return;
     isAnimating.current = true;
     scrollLock.lock();
     setIsExiting(true);
 
-    // Shrink down
-    animate(scale,        minScale,  { duration: SNAP_DURATION,   ease: [0.76, 0, 0.24, 1] });
-    animate(borderRadius, maxRadius, { duration: SNAP_DURATION,   ease: [0.76, 0, 0.24, 1] });
-    animate(marginX,      maxMargin, { duration: SNAP_DURATION,   ease: [0.76, 0, 0.24, 1] });
+    // Phase 1 — shrink: scale down + round corners + side margins (all use SNAP_DURATION)
+    animate(scale,        minScale,  { duration: SNAP_DURATION, ease: EASE });
+    animate(borderRadius, maxRadius, { duration: SNAP_DURATION, ease: EASE });
+    animate(marginX,      maxMargin, { duration: SNAP_DURATION, ease: EASE });
 
+    // Phase 2 — after PAUSE_DURATION, scroll to end of this section (EXPAND_DURATION)
     setTimeout(() => {
       const section = sectionRef.current;
       if (!section) return;
@@ -45,7 +52,7 @@ export default function SectionTransition({
       const startY = window.scrollY;
       animate(startY, targetY, {
         duration: EXPAND_DURATION,
-        ease: [0.76, 0, 0.24, 1],
+        ease: EASE,
         onUpdate: (val) => window.scrollTo(0, val),
         onComplete: () => {
           scale.set(1);
@@ -59,6 +66,7 @@ export default function SectionTransition({
     }, PAUSE_DURATION);
   }, [borderRadius, marginX, maxMargin, maxRadius, minScale, scale]);
 
+  // Scroll up: when section is stuck but scrolled past top, snap back to section start
   const snapToTop = useCallback(() => {
     if (isAnimating.current || scrollLock.locked) return;
     isAnimating.current = true;
@@ -68,7 +76,7 @@ export default function SectionTransition({
     const startY = window.scrollY;
     animate(startY, targetY, {
       duration: SNAP_DURATION,
-      ease: [0.76, 0, 0.24, 1],
+      ease: EASE,
       onUpdate: (val) => window.scrollTo(0, val),
       onComplete: () => {
         isAnimating.current = false;
@@ -77,6 +85,7 @@ export default function SectionTransition({
     });
   }, []);
 
+  // Wheel handler: only active while this full-screen section is in view
   useEffect(() => {
     const onWheel = (e) => {
       const section = sectionRef.current;
@@ -100,7 +109,9 @@ export default function SectionTransition({
   }, [isExiting, shrinkOut, snapToTop]);
 
   return (
+    // Outer wrapper: one viewport tall; offsetTop/Height drive scroll targets
     <div ref={sectionRef} className="relative h-screen">
+      {/* Sticky viewport: bg shows as a frame when inner content shrinks */}
       <div className="sticky top-0 h-screen overflow-hidden" style={{ backgroundColor: bgColor }}>
         <motion.div
           className="w-full h-full overflow-hidden"

@@ -13,7 +13,7 @@ const singlePage = (S, typeName, title) =>
 
 export const structure = (S) =>
   S.list()
-    .title('Your website')
+    .title('Website Content')
     .items([
       singlePage(S, 'intro', 'Movie Intro Screen'),
       S.listItem()
@@ -22,9 +22,10 @@ export const structure = (S) =>
           S.list()
             .title('Sections')
             .items([
-              singlePage(S, 'home', 'Home Section'),
+              // singlePage(S, 'home', 'Home Section'),
               singlePage(S, 'mission', 'Mission Section'),
               S.documentTypeListItem('works').title('Works Section'),
+              singlePage(S, 'collabMar', 'Collaboration Marquee Section'),
               singlePage(S, 'contact', 'Contact Section'),
             ]),
         ),
