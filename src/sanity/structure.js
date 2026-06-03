@@ -1,6 +1,7 @@
 // https://www.sanity.io/docs/structure-builder-cheat-sheet
 
-const singleton = (S, typeName, title) =>
+/** One shared page or site-wide setting — each item opens a single editor. */
+const singlePage = (S, typeName, title) =>
   S.listItem()
     .title(title)
     .child(
@@ -12,30 +13,30 @@ const singleton = (S, typeName, title) =>
 
 export const structure = (S) =>
   S.list()
-    .title('Content')
+    .title('Your website')
     .items([
-      singleton(S, 'intro', 'Opening Video'),
+      singlePage(S, 'intro', 'Movie Intro Screen'),
       S.listItem()
-        .title('Sections')
+        .title('Home Page')
         .child(
           S.list()
             .title('Sections')
             .items([
-              singleton(S, 'home', 'Home'),
-              singleton(S, 'mission', 'Mission'),
-              S.documentTypeListItem('works').title('Works'),
-              singleton(S, 'contact', 'Contact'),
+              singlePage(S, 'home', 'Home Section'),
+              singlePage(S, 'mission', 'Mission Section'),
+              S.documentTypeListItem('works').title('Works Section'),
+              singlePage(S, 'contact', 'Contact Section'),
             ]),
         ),
       S.listItem()
-        .title('Menus & Footer')
+        .title('Menus & footer')
         .child(
           S.list()
             .title('Menus & Footer')
             .items([
-              singleton(S, 'navbar', 'Top Menu'),
-              singleton(S, 'moreInfo', 'Side Panel'),
-              singleton(S, 'footer', 'Footer'),
+              singlePage(S, 'navbar', 'Main menu (top of site)'),
+              singlePage(S, 'moreInfo', 'Info panel (slide-out)'),
+              singlePage(S, 'footer', 'Footer'),
             ]),
         ),
     ])

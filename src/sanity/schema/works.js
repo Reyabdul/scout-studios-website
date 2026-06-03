@@ -7,6 +7,17 @@ export const works = defineType({
   type: 'document',
   fields: [
     defineField({
+      name: 'order',
+      type: 'number',
+      title: 'Order',
+      description: 'Display order (1 = first video, 2 = second, etc.)',
+      validation: Rule =>
+        Rule.required()
+          .integer()
+          .min(1)
+          .error('Order must be a positive integer starting at 1'),
+    }),
+    defineField({
       name: 'title',
       type: 'string',
       title: 'Title',
@@ -39,4 +50,16 @@ export const works = defineType({
           .error('Year should be a valid number'),
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      order: 'order',
+    },
+    prepare({ title, order }) {
+      return {
+        title: title || 'Untitled work',
+        subtitle: order != null ? `Order ${order}` : 'No order set',
+      }
+    },
+  },
 })

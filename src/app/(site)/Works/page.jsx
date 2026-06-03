@@ -1,74 +1,70 @@
-// features/scrollVideo/Works.jsx
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { animate, useScroll } from 'framer-motion';
+import { animate } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { client } from '../../../sanity/lib/client';
 import VideoLayer from '../../features/scrollVideo/VideoLayer';
 import VideoInfo from '../../features/scrollVideo/VideoInfo';
 
-// If you are using a CMS like Sanity and want to use dynamic data, you might want to fetch works here.
-// Currently using static sample videos for local dev.
 const SNAP_DURATION   = 0.5;
 const PAUSE_DURATION  = 500;
 const EXPAND_DURATION = 0.5;
 const LOCK_DURATION   = PAUSE_DURATION + EXPAND_DURATION * 1000 + 300;
 
-// Only one "videos" declaration should exist.
-// You may replace this static data with your dynamic data from CMS/query as needed.
-const videos = [
-  {
-    src: '/videos/test1.mp4',
-    title: 'Sweetness',
-    director: 'Jane Smith',
-    producer: 'John Doe',
-    year: '2024',
-  },
-  {
-    src: '/videos/test2.mp4',
-    title: 'Neon Drift',
-    director: 'Carlos Rivera',
-    producer: 'Amy Chen',
-    year: '2024',
-  },
-  {
-    src: '/videos/test3.mp4',
-    title: 'Golden Hour',
-    director: 'Mia Tanaka',
-    producer: 'Leo Park',
-    year: '2025',
-  },
+const LOCAL_VIDEO_SOURCES = [
+  '/videos/test1.mp4',
+  '/videos/test2.mp4',
+  '/videos/test3.mp4',
 ];
 
-// If you want to fetch works from a backend, keep and use this hook with your client logic.
-// Remove if not needed here.
-/*
-export function useWorks() {
+const worksQuery = `*[_type == "works"] | order(order asc) {
+  _id,
+  title,
+  company,
+  creator,
+  service,
+  year,
+  order
+}`;
+
+function mergeWorksWithLocalVideos(works) {
+  const sorted = works ?? [];
+  return LOCAL_VIDEO_SOURCES.map((src, index) => {
+    const work = sorted.find((w) => w.order === index + 1);
+    if (!work) return null;
+    return {
+      id: work._id,
+      src,
+      title: work.title,
+      director: work.creator ?? '',
+      producer: work.company ?? '',
+      year: work.year != null ? String(work.year) : '',
+    };
+  }).filter(Boolean);
+}
+
+function useWorks() {
   return useQuery({
     queryKey: ['works'],
-    queryFn:  () => client.fetch(worksQuery),
-    staleTime: 1000 * 60 * 5, // treat data as fresh for 5 minutes before background refetch
+    queryFn: () => client.fetch(worksQuery),
+    staleTime: 1000 * 60 * 5,
   });
 }
-*/
-
-// If you want to use works from CMS, fetch and map to videos array inside the component or as a top-level hook above.
 
 export default function Works() {
+  const { data, isLoading, error } = useWorks();
+  const videos = mergeWorksWithLocalVideos(data);
+
   const sectionRef   = useRef(null);
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [prevIndex, setPrevIndex]     = useState(null);
   const isAnimating  = useRef(false);
-  // Track whether we've fully settled on the last video
   const atEnd        = useRef(false);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
-
   const snapToIndex = useCallback((index) => {
-    if (isAnimating.current) return;
+    if (isAnimating.current || videos.length === 0) return;
     const clamped = Math.max(0, Math.min(videos.length - 1, index));
     if (clamped === activeIndex) return;
 
@@ -88,21 +84,21 @@ export default function Works() {
       ease: [0.3, 0, 0.24, 1],
       onUpdate: (val) => window.scrollTo(0, val),
       onComplete: () => {
-        // Clear wasActive immediately so the expand animation fires cleanly
         setPrevIndex(null);
 
         setTimeout(() => {
           isAnimating.current = false;
-          // Mark that we've fully settled on the last video
           if (clamped === videos.length - 1) {
             atEnd.current = true;
           }
         }, LOCK_DURATION);
       },
     });
-  }, [activeIndex]);
+  }, [activeIndex, videos.length]);
 
   useEffect(() => {
+    if (videos.length === 0) return;
+
     const onWheel = (e) => {
       const section   = sectionRef.current;
       const container = containerRef.current;
@@ -115,18 +111,13 @@ export default function Works() {
       const goingDown = e.deltaY > 0;
       const goingUp   = e.deltaY < 0;
 
-      // At first video going up — let page scroll naturally out the top
       if (activeIndex === 0 && goingUp) return;
 
-      // At last video going down — only let scroll through AFTER
-      // the expand animation has fully completed (atEnd.current = true)
       if (activeIndex === videos.length - 1 && goingDown) {
         if (!atEnd.current) {
-          // Still animating in — block scroll
           e.preventDefault();
           return;
         }
-        // Settled — let natural scroll take over into next section
         return;
       }
 
@@ -137,9 +128,34 @@ export default function Works() {
 
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
-  }, [activeIndex, snapToIndex]);
+  }, [activeIndex, snapToIndex, videos.length]);
+
+  if (isLoading) {
+    return (
+      <section id="works" className="h-screen flex items-center justify-center bg-white">
+        <p className="text-black/50">Loading works…</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="works" className="h-screen flex items-center justify-center bg-white">
+        <p className="text-black/50">Failed to load works. Please try again later.</p>
+      </section>
+    );
+  }
+
+  if (videos.length === 0) {
+    return (
+      <section id="works" className="h-screen flex items-center justify-center bg-white">
+        <p className="text-black/50">No works published yet.</p>
+      </section>
+    );
+  }
 
   const scrollHeight = `${videos.length * 100}vh`;
+  const activeVideo = videos[activeIndex];
 
   return (
     <section ref={sectionRef} id="works">
@@ -147,16 +163,15 @@ export default function Works() {
         <div className="sticky top-0 h-screen bg-white overflow-hidden flex items-center justify-center">
           {videos.map((video, i) => (
             <VideoLayer
-              key={video.src}
+              key={video.id}
               video={video}
               index={i}
               total={videos.length}
-              scrollYProgress={scrollYProgress}
               isActive={i === activeIndex}
               wasActive={i === prevIndex}
             />
           ))}
-          <VideoInfo video={videos[activeIndex]} />
+          <VideoInfo video={activeVideo} />
         </div>
       </div>
     </section>
