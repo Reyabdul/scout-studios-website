@@ -9,57 +9,34 @@ export const works = defineType({
     defineField({
       name: 'title',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      title: 'Title',
+      validation: Rule => Rule.required().error('Title is required'),
     }),
     defineField({
       name: 'company',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      title: 'Company',
+      validation: Rule => Rule.required().error('Company is required'),
     }),
-
     defineField({
       name: 'creator',
       title: 'Creator / Director',
       type: 'string',
     }),
-
     defineField({
       name: 'service',
+      title: 'Service',
       type: 'string',
     }),
-
     defineField({
       name: 'year',
       type: 'number',
+      title: 'Year',
+      validation: Rule =>
+        Rule.integer()
+          .min(1900)
+          .max(new Date().getFullYear() + 1)
+          .error('Year should be a valid number'),
     }),
-
-
-    // Video preview (local or CDN — used in your animation)
-    // defineField({
-    //   name: 'previewVideo',
-    //   title: 'Preview Video (MP4/WebM)',
-    //   type: 'file',
-    //   options: {
-    //     accept: 'video/*',
-    //   },
-    //   validation: (Rule) => Rule.required(),
-    // }),
-
-    // External link (YouTube, Vimeo, etc.)
-    defineField({
-      name: 'externalUrl',
-      title: 'External Video Link',
-      type: 'url',
-      validation: (Rule) =>
-        Rule.required().uri({
-          scheme: ['http', 'https'],
-        }),
-    }),
-
-    // Optional thumbnail
-    // defineField({
-    //   name: 'thumbnail',
-    //   type: 'image',
-    // }),
   ],
 })

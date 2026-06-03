@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import SideBar from "../SideBar/page";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "../../../sanity/lib/client";
 
-function useInvertOnSections(sectionIds = ["mission", "marquee", "contact"]) {
+import { container, item, divider } from "../../(site)/animiations/uiMotions";
+
+function useInvertOnSections(sectionIds = ["mission", "collaborationmarquee", "contact"]) {
   const [inverted, setInverted] = useState(false);
 
   useEffect(() => {
@@ -15,9 +18,8 @@ function useInvertOnSections(sectionIds = ["mission", "marquee", "contact"]) {
       for (const sectionId of sectionIds) {
         const section = document.getElementById(sectionId);
         if (!section) continue;
-        const rect = section.getBoundingClientRect();
 
-        // Section is at least partially in the viewport
+        const rect = section.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           found = true;
           break;
@@ -28,7 +30,7 @@ function useInvertOnSections(sectionIds = ["mission", "marquee", "contact"]) {
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // Check on mount
+    onScroll();
 
     return () => window.removeEventListener("scroll", onScroll);
   }, [sectionIds]);
@@ -38,139 +40,102 @@ function useInvertOnSections(sectionIds = ["mission", "marquee", "contact"]) {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const invert = useInvertOnSections(["mission", "marquee", "contact"]);
-  const { data, isLoading, error } = useQuery({
+  const invert = useInvertOnSections();
+
+  const { data } = useQuery({
     queryKey: ["navbar"],
-    queryFn: () =>
-      client.fetch(`*[_type == "navbar"][0]`),
+    queryFn: () => client.fetch(`*[_type == "navbar"][0]`),
   });
 
-  // Utility classnames for inversion
-  const textColor = invert ? "text-white" : "text-black";
-  const dotBg = invert ? "bg-white" : "bg-black";
-  const borderColor = invert ? "#FFF" : "#888";
-
-  // Handler to close menu for accessibility (e.g. esc key, can be expanded)
-  const closeMenu = useCallback(() => setOpen(false), []);
-
-  // Fallbacks if fields are missing
   const siteName = data?.siteName;
-  // Sanity: [{label: ...}], fallback: ["Works",...]
-  const links =
-    Array.isArray(data?.links) && data.links.length > 0
-      ? data.links
-      : ["Works", "Mission", "Contact"];
+  const links = data?.links || ["Works", "Mission", "Contact"];
   const sideBarTitle = data?.sideBarTitle ?? "More Info";
-
-  // Main navigation content to ensure center alignment
-  const navContent = (
-    <div className="flex flex-col items-center">
-      <span className="w-16 font-bold text-lg mb-1">
-        <a
-          href="#home"
-          className={`block text-center border-b-2 ${textColor}`}
-          style={{
-            borderColor: invert ? "#FFF" : "#000",
-            borderBottomWidth: "2px",
-            borderBottomStyle: "solid"
-          }}>
-          {siteName}
-        </a>
-      </span>
-      <div className="flex gap-8 text-sm font-medium">
-        {links.map((link, idx) => {
-          // Support objects from Sanity and fallback to string
-          const label = typeof link === "string" ? link : link.label;
-          const labelStr = typeof label === "string" ? label : "";
-          const href = `#${labelStr.toLowerCase()}`;
-          return (
-            <a
-              key={labelStr + idx}
-              href={href}
-              className={textColor}
-              style={{ color: invert ? "#FFF" : "#000" }}
-            >
-              {labelStr}
-            </a>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  // Loading & error placeholders centered
-  if (isLoading) {
-    return (
-      <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
-      >
-        <div className="flex flex-col items-center">
-          <span className="w-16 font-bold text-lg mb-1 animate-pulse bg-gray-200 h-6 rounded"></span>
-          <div className="flex gap-8 text-sm font-medium">
-            <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
-            <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
-            <span className="block h-4 w-12 bg-gray-200 rounded animate-pulse"></span>
-          </div>
-        </div>
-        <button type="button" className="font-small leading-0.5 ml-8" disabled>
-          <span className="text-lg bg-gray-200 w-20 inline-block h-4 rounded animate-pulse"></span>
-        </button>
-      </nav>
-    );
-  }
-
-  if (error) {
-    return (
-      <nav
-        className={`fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-40 ${textColor}`}
-      >
-        <div className="flex flex-col items-center">
-          <span className="w-16 font-bold text-lg mb-1 text-red-500">Error</span>
-          <div className="flex gap-8 text-sm font-medium">
-            <span>Error loading navbar</span>
-          </div>
-        </div>
-        <button type="button" className="font-small leading-0.5 ml-8" disabled>
-          <span className="text-lg">...</span>
-        </button>
-      </nav>
-    );
-  }
+  const textColor = invert ? "#FFF" : "#000";
 
   return (
     <>
-      {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 w-full h-20.5 flex items-center justify-center px-8 bg-transparent z-50">
-        <div className="absolute left-8 flex items-center h-full">
-          {/* Empty left-aligned spacer. Hide from screen readers. */}
-          <div className="w-25" aria-hidden="true" />
-        </div>
-        {/* Center nav -- content is centered using justify-center on parent flex */}
-        {navContent}
-        <div className="absolute right-8 flex items-center h-full">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className={`font-small leading-0.5 bg-transparent flex flex-col items-center ${textColor}`}
-            aria-label="Open sidebar"
+      <nav className="fixed top-0 left-0 w-full h-20 flex items-center justify-center px-8 z-50">
+        
+        {/* Center Content */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="flex flex-col items-center"
+        >
+          
+          {/* Site Name with Center-Out Divider */}
+          <motion.div variants={item} className="mb-1">
+            <a
+              href="#home"
+              className="relative inline-block text-lg font-bold"
+              style={{ color: textColor }}
+            >
+              {siteName}
+
+              <motion.span
+                variants={divider}
+                className="absolute left-1/2 border-b-2"
+                style={{
+                  bottom: "-2px",
+                  width: "300%", // 🔥 3x width
+                  transformOrigin: "center",
+                  borderColor: textColor,
+                }}
+              />
+            </a>
+          </motion.div>
+
+          {/* Links (no divider) */}
+          <motion.div
+            variants={container}
+            className="flex gap-8 text-sm font-medium"
           >
-            <span className={`text-sm ${textColor}`}>{sideBarTitle}</span>
-            <div className="flex gap-1 mt-1">
-              {[0, 1, 2].map(i => (
-                <span
+            {links.map((link, i) => {
+              const label = typeof link === "string" ? link : link.label;
+
+              return (
+                <motion.a
                   key={i}
-                  className={`w-2 h-2 rounded-full ${dotBg}`}
-                  style={{
-                    backgroundColor: "transparent",
-                    border: `1px solid black`
-                  }}
-                />
-              ))}
-            </div>
+                  variants={item}
+                  href={`#${label.toLowerCase()}`}
+                  style={{ color: textColor }}
+                >
+                  {label}
+                </motion.a>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+
+        {/* Right Button */}
+        <div className="absolute right-8 flex flex-col items-center">
+          <button
+            onClick={() => setOpen(true)}
+            className="text-sm"
+            style={{ color: textColor }}
+          >
+            {sideBarTitle}
           </button>
+
+          {/* Dots */}
+          <div className="flex gap-1 mt-1">
+            {[0, 1, 2].map(i => (
+              <span
+                key={i}
+                className="w-2 h-2 rounded-full"
+                style={{
+                  backgroundColor: textColor,
+                  border: `1px solid ${textColor}`,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </nav>
-      {/* SLIDE MENU - open and close are controlled by open/setOpen */}
-      <SideBar open={open} setOpen={setOpen} /></>
+
+      {/* Sidebar */}
+      <SideBar open={open} setOpen={setOpen} />
+    </>
   );
 }

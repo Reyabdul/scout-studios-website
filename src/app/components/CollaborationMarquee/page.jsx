@@ -1,165 +1,91 @@
 'use client';
 
-import { useRef } from 'react';
+import React from 'react';
 
 const collaborations = [
-  { type: 'text',  text: 'SALOMON' },
-  { type: 'text',  text: 'MAKER' },
-  { type: 'text',  text: 'Foot Locker' },
-  { type: 'text',  text: 'adidas' },
-  { type: 'text',  text: 'Nike' },
-  { type: 'text',  text: 'New Balance' },
-  { type: 'text',  text: 'Puma' },
+  'SALOMON',
+  'MAKER',
+  'FOOT LOCKER',
+  'ADIDAS',
+  'NIKE',
+  'NEW BALANCE',
+  'PUMA',
 ];
 
-// Separator between items
-function Dot() {
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        width: '6px',
-        height: '6px',
-        borderRadius: '50%',
-        background: '#F5C832',
-        margin: '0 2rem',
-        flexShrink: 0,
-        verticalAlign: 'middle',
-      }}
-    />
-  );
-}
-
-function MarqueeItem({ item }) {
-  if (item.type === 'label') {
-    return (
-      <span
-        style={{
-          fontFamily: 'serif',
-          fontSize: '0.85rem',
-          fontStyle: 'italic',
-          color: 'rgba(255,255,255,0.45)',
-          letterSpacing: '0.05em',
-          flexShrink: 0,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {item.text}:
-      </span>
-    );
-  }
-
-  return (
-    <span
-      style={{
-        fontFamily: '"Arial Black", "Arial Bold", sans-serif',
-        fontWeight: 900,
-        fontSize: '2rem',
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: '#ffffff',
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {item.text}
-    </span>
-  );
-}
-
 export default function CollaborationsMarquee() {
+  // For a seamless marquee (no gaps as it wraps), ensure items are duplicated more than once
+  // and the track is wide enough. We'll ensure a minimum double duplication.
+  const items = [...collaborations, ...collaborations];
+
   return (
     <section
-      style={{
-        background: '#080c0a',
-        padding: '1.25rem 0',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh', // Set section height to 70vh
-      }}
+      id="collaborationmarquee"
+      className="relative bg-[#080c0a] py-24 overflow-hidden flex flex-col items-center gap-8"
+      tabIndex={-1}
+      aria-label="Collaborations Marquee"
     >
-      <div style={{
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}>
-        <h2 className='text-white flex items-center justify-center pb-8' style={{textAlign: 'center'}}>Collaborations:</h2>
-      </div>
-      {/* Keyframe injection */}
-      <style>{`
-        @keyframes marquee-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-wrapper:hover .marquee-track {
-          animation-play-state: paused;
-        }
-      `}</style>
+      {/* Label */}
+      <p className="text-xs tracking-[0.3em] text-white/40 uppercase mb-2">
+        Collaborations
+      </p>
 
-      {/* Left fade */}
-      <div
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '120px',
-          background: 'linear-gradient(to right, #080c0a, transparent)',
-          zIndex: 2,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Right fade */}
-      <div
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '120px',
-          background: 'linear-gradient(to left, #080c0a, transparent)',
-          zIndex: 2,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Scrolling track */}
-      <div
-        className="marquee-wrapper"
-        style={{
-          width: '100%',
-          display: 'flex', 
-          justifyContent: 'center',
-          overflow: 'hidden'
-        }}
-      >
-        <div 
-          className="marquee-track" 
+      {/* Marquee */}
+      <div className="relative w-full overflow-hidden">
+        {/* Fade edges */}
+        <div
+          className="pointer-events-none absolute left-0 top-0 bottom-0 w-24 z-10"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            animation: 'marquee-scroll 10s linear infinite', // Made 2x faster by halving the duration
-            willChange: 'transform',
-            justifyContent: 'center',
-            width: '100%',
-          }}>
-          {[...collaborations, ...collaborations, ...collaborations, ...collaborations].map((item, i) => (
-            <span 
-              key={i} 
-              style={{ display: 'flex', alignItems: 'center', flexShrink: 0, justifyContent: 'center' }}
+            background: 'linear-gradient(to right, #080c0a, transparent)',
+          }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 z-10"
+          style={{
+            background: 'linear-gradient(to left, #080c0a, transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Track */}
+        <div className="marquee-track flex whitespace-nowrap">
+          {items.map((item, i) => (
+            <span
+              key={`${item}-${i}`}
+              className="flex items-center mx-8 text-3xl font-black tracking-wider text-white/80 whitespace-nowrap"
+              aria-label={i === 0 ? `Brand: ${item}` : undefined}
             >
-              <MarqueeItem item={item} />
-              <Dot />
+              {item}
+              {/* Show the dot separator except after the last item for semantics */}
+              <span
+                aria-hidden="true"
+                role="presentation"
+                className="mx-8 w-1.5 h-1.5 rounded-full bg-[#F5C832] inline-block"
+              />
             </span>
           ))}
         </div>
       </div>
+
+      {/* Keyframes */}
+      <style jsx>{`
+        .marquee-track {
+          will-change: transform;
+          min-width: 200%;
+          animation: marquee 20s linear infinite;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
     </section>
   );
 }

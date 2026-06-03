@@ -6,11 +6,15 @@ import { animate, useScroll } from 'framer-motion';
 import VideoLayer from '../../features/scrollVideo/VideoLayer';
 import VideoInfo from '../../features/scrollVideo/VideoInfo';
 
+// If you are using a CMS like Sanity and want to use dynamic data, you might want to fetch works here.
+// Currently using static sample videos for local dev.
 const SNAP_DURATION   = 0.5;
 const PAUSE_DURATION  = 500;
 const EXPAND_DURATION = 0.5;
 const LOCK_DURATION   = PAUSE_DURATION + EXPAND_DURATION * 1000 + 300;
 
+// Only one "videos" declaration should exist.
+// You may replace this static data with your dynamic data from CMS/query as needed.
 const videos = [
   {
     src: '/videos/test1.mp4',
@@ -34,6 +38,20 @@ const videos = [
     year: '2025',
   },
 ];
+
+// If you want to fetch works from a backend, keep and use this hook with your client logic.
+// Remove if not needed here.
+/*
+export function useWorks() {
+  return useQuery({
+    queryKey: ['works'],
+    queryFn:  () => client.fetch(worksQuery),
+    staleTime: 1000 * 60 * 5, // treat data as fresh for 5 minutes before background refetch
+  });
+}
+*/
+
+// If you want to use works from CMS, fetch and map to videos array inside the component or as a top-level hook above.
 
 export default function Works() {
   const sectionRef   = useRef(null);

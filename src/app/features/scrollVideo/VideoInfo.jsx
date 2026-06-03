@@ -1,4 +1,3 @@
-// features/scrollVideo/VideoInfo.jsx
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';

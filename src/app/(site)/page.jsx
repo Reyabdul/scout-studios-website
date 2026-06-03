@@ -80,14 +80,10 @@ export default function Page() {
               </SectionTransition>
 
               {/* Collaboration Marquee */}
-              <section className='bg-[#080c0a] flex items-center justify-center"'>
-                  <CollaborationsMarquee />
-                </section>
+              <CollaborationsMarquee />
 
               {/* Contact — last section, no transition needed */}
-              <section id="contact" className="bg-[#080c0a] flex items-center justify-center">
-                  <Contact />
-                </section>
+              <Contact />
 
               {/* Footer fades in */}
               <motion.div

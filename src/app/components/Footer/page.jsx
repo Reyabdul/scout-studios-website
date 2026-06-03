@@ -1,8 +1,14 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { client } from "../../../sanity/lib/client";
 import { useEffect, useState } from "react";
 
-function useFooterTextColor(sectionIds = ["mission", "marquee", "contact"]) {
+import { container, item } from "../../(site)/animiations/uiMotions";
+
+// ✅ Restore invert logic
+function useFooterTextColor(sectionIds = ["mission", "collaborationmarquee", "contact"]) {
   const [isWhite, setIsWhite] = useState(false);
 
   useEffect(() => {
@@ -12,9 +18,8 @@ function useFooterTextColor(sectionIds = ["mission", "marquee", "contact"]) {
       for (const sectionId of sectionIds) {
         const section = document.getElementById(sectionId);
         if (!section) continue;
-        const rect = section.getBoundingClientRect();
 
-        // Section is at least partially in the viewport
+        const rect = section.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
           found = true;
           break;
@@ -25,8 +30,7 @@ function useFooterTextColor(sectionIds = ["mission", "marquee", "contact"]) {
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // Check on mount
-
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [sectionIds]);
 
@@ -34,43 +38,29 @@ function useFooterTextColor(sectionIds = ["mission", "marquee", "contact"]) {
 }
 
 export default function Footer() {
-  // Get date real-time
   const year = new Date().getFullYear();
 
-  const { data, isLoading, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ["footer"],
     queryFn: () =>
       client.fetch(`*[_type == "footer"][0]{ footerText }`),
   });
 
-  // Custom hook to determine if footer text should be white
-  const isWhite = useFooterTextColor(["mission", "marquee", "contact"]);
-
-  if (isLoading) {
-    return (
-      <footer className="fixed bottom-0 left-0 w-full py-4 flex justify-center text-xs text-black bg-transparent z-30">
-        <span className={isWhite ? "text-white" : "text-black"}>
-          Loading footer...
-        </span>
-      </footer>
-    );
-  }
-
-  if (error) {
-    return (
-      <footer className="fixed bottom-0 left-0 w-full py-4 flex justify-center text-xs text-black bg-transparent z-30">
-        <span className={isWhite ? "text-white" : "text-black"}>
-          Error loading footer.
-        </span>
-      </footer>
-    );
-  }
+  const isWhite = useFooterTextColor();
+  const textColor = isWhite ? "#FFF" : "#000";
 
   return (
-    <footer className="fixed bottom-0 left-0 w-full py-4 flex justify-center text-xs text-black bg-transparent z-30">
-      <span className={isWhite ? "text-white" : "text-black"}>
-        © {data?.footerText ?? ""} {year}
-      </span>
+    <footer className="fixed bottom-0 left-0 w-full py-4 flex justify-center text-xs z-30">
+      
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.span variants={item} style={{ color: textColor }}>
+          © {data?.footerText ?? ""} {year}
+        </motion.span>
+      </motion.div>
     </footer>
   );
 }

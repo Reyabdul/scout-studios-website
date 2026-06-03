@@ -1,4 +1,3 @@
-// features/scrollVideo/VideoLayer.jsx
 'use client';
 
 import { useEffect } from 'react';
@@ -45,7 +44,7 @@ export default function VideoLayer({
 
       return () => clearTimeout(timeout);
     }
-  }, [isActive, wasActive]);
+  }, [isActive, wasActive, opacity, scale, borderRadius, marginX]);
 
   return (
     <motion.div

@@ -1,118 +1,54 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import CollaborationsMarquee from '../../components/CollaborationMarquee/page';
+import { motion } from 'framer-motion';
 
-const EMAIL = 'you@yourdomain.com'; // ← replace with your email
+const EMAIL = 'you@yourdomain.com';
 
 export default function Contact() {
-  const [hovered, setHovered] = useState(false);
-  const [underlineWidth, setUnderlineWidth] = useState(0);
-  const intervalRef = useRef(null);
-  const widthRef = useRef(0);
-
-  const handleMouseEnter = () => {
-    setHovered(true);
-    // Grow underline gradually the longer you hover
-    intervalRef.current = setInterval(() => {
-      widthRef.current = Math.min(widthRef.current + 1.2, 100);
-      setUnderlineWidth(widthRef.current);
-    }, 16); // ~60fps
-  };
-
-  const handleMouseLeave = () => {
-    setHovered(false);
-    clearInterval(intervalRef.current);
-    // Snap back quickly
-    const start = widthRef.current;
-    const startTime = performance.now();
-    const duration = 400;
-
-    const shrink = (now) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - t, 3); // ease out cubic
-      widthRef.current = start * (1 - eased);
-      setUnderlineWidth(widthRef.current);
-      if (t < 1) requestAnimationFrame(shrink);
-    };
-    requestAnimationFrame(shrink);
-  };
-
   return (
     <section
       id="contact"
-      className="relative w-full h-[50vh] flex flex-col items-center justify-center mb-20 overflow-hidden"
-      style={{ background: '#080c0a' }}
+      className="relative bg-[#080c0a] py-32 flex flex-col items-center gap-10 text-center"
     >
-      
-      {/* Top rule */}
+      {/* Top divider */}
       <motion.div
-        className="absolute w-4/5"
-        style={{ top: '12%', height: '1px', background: 'white' }}
+        className="w-full max-w-4xl h-px bg-white/20"
         initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
+        whileInView={{ scaleX: 1 }}
+        transition={{ duration: 1 }}
       />
 
-      {/* Bottom rule */}
-      <motion.div
-        className="absolute w-4/5"
-        style={{ bottom: '12%', height: '1px', background: 'white' }}
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1], delay: 0.4 }}
-      />
+      {/* Supporting text FIRST */}
+      <motion.p
+        className="text-white/50 max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+      >
+        Let’s build something meaningful together.
+      </motion.p>
 
-      {/* CTA */}
+      {/* Main CTA */}
       <motion.a
         href={`mailto:${EMAIL}`}
-        className="relative z-10 select-none cursor-pointer no-underline"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        className="group relative inline-block"
         initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1], delay: 0.6 }}
-        style={{ textDecoration: 'none' }}
+        whileInView={{ opacity: 1, y: 0 }}
       >
-        <motion.span
-          style={{
-            display: 'block',
-            fontFamily: '"Arial Black", "Arial Bold", sans-serif',
-            fontWeight: 900,
-            fontSize: 'clamp(2.5rem, 8vw, 6.5rem)',
-            letterSpacing: '-0.02em',
-            textTransform: 'uppercase',
-            lineHeight: 1,
-            color: hovered ? '#F5C832' : '#F5C832',
-            scale: hovered ? 0.96 : 1,
-            transition: 'color 0.4s ease, scale 0.4s ease',
-          }}
-          animate={{
-            scale: hovered ? 0.96 : 1,
-            color: hovered ? 'gray' : '#e8f5ee',
-          }}
-          transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
-        >
-          Get In Touch
-        </motion.span>
+        <span className="text-5xl md:text-6xl font-black tracking-tight text-white transition-all duration-300 group-hover:text-[#F5C832] group-hover:scale-95">
+          GET IN TOUCH
+        </span>
 
-        {/* Underline — grows the longer you hover */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-8px',
-            left: 0,
-            height: '3px',
-            width: `${underlineWidth}%`,
-            background: hovered
-              ? 'linear-gradient(#F5C832)'
-              : 'transparent',
-            borderRadius: '2px',
-            transition: 'background 0.3s ease',
-          }}
-        />
+        {/* underline animation */}
+        <span className="absolute left-1/2 -bottom-3 h-0.5 w-0 bg-[#F5C832] transition-all duration-300 group-hover:w-full group-hover:left-0" />
       </motion.a>
+
+      {/* Bottom divider */}
+      <motion.div
+        className="w-full max-w-4xl h-px bg-white/20 mt-8"
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        transition={{ duration: 1, delay: 0.2 }}
+      />
     </section>
   );
 }
